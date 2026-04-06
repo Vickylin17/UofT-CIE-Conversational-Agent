@@ -1,0 +1,12 @@
+beautifulsoup4>=4.12.3
+chromadb>=0.5.3
+langchain-text-splitters>=0.2.2
+numpy>=1.26.4
+openai>=1.35.13
+pydantic>=2.7.4
+python-dotenv>=1.0.1
+requests>=2.32.3
+scikit-learn>=1.5.1
+sentence-transformers>=3.0.1
+streamlit>=1.36.0
+tenacity>=8.4.2

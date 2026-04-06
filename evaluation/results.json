@@ -1,0 +1,338 @@
+{
+  "total_cases": 15,
+  "passed_cases": 14,
+  "pass_rate": 0.9333333333333333,
+  "average_scores": {
+    "intent_accuracy": 1.0,
+    "action_success_rate": 1.0,
+    "answer_relevancy": 0.9,
+    "faithfulness": 0.9222222222222223,
+    "context_precision": 0.9666666666666667,
+    "safe_response": 1.0,
+    "error_handling_success": 1.0
+  },
+  "failure_cases": [
+    {
+      "case_id": "knowledge-roadmap",
+      "category": "knowledge",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3333333333333333,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Title: ISE Roadmap\nCategory: Ise Roadmap\nSection: ISE Roadmap\nContent: Are you clear with your next steps?",
+      "notes": ""
+    }
+  ],
+  "results": [
+    {
+      "case_id": "knowledge-prearrival",
+      "category": "knowledge",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.8333333333333334,
+        "context_precision": 0.5,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Title: Pre-Arrival\nCategory: Pre Arrival\nSection: Pre-Arrival\nContent: Congratulations and welcome to the University of Toronto!",
+      "notes": "Should mention the pre-arrival section when the index has been built."
+    },
+    {
+      "case_id": "knowledge-finances",
+      "category": "knowledge",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.6666666666666666,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Title: Finances\nCategory: Finances\nSection: Finances\nContent: As an international student at U of T, you may have a variety of questions that relate to your finances.",
+      "notes": ""
+    },
+    {
+      "case_id": "knowledge-uhip",
+      "category": "knowledge",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Title: Managing Your UHIP\nCategory: Resource Hub\nSection: Extensions: Frequently asked questions\nContent: If you are graduating early and will not be enrolled in courses in the next semester, you will need to apply for a UHIP extension.",
+      "notes": ""
+    },
+    {
+      "case_id": "knowledge-roadmap",
+      "category": "knowledge",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3333333333333333,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Title: ISE Roadmap\nCategory: Ise Roadmap\nSection: ISE Roadmap\nContent: Are you clear with your next steps?",
+      "notes": ""
+    },
+    {
+      "case_id": "action-checklist-direct",
+      "category": "action",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "pre_arrival_checklist",
+      "predicted_tool": "pre_arrival_checklist",
+      "answer": "Personalized pre-arrival checklist for a graduate student with status `arriving_soon`:\n- Coordinate with your graduate unit on registration and orientation timelines.\n- Prepare immigration documents and passport copies for travel and onboarding.\n- Review UHIP, funding disbursement timing, and arrival logistics.\n- Gather academic and financial records you may need after arrival.\n- Prepare printed and digital copies of your travel, immigration, and housing documents.\n- Plan your airport-to-housing route and your first-week essentials.",
+      "notes": ""
+    },
+    {
+      "case_id": "action-checklist-followup",
+      "category": "multi_turn",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "pre_arrival_checklist",
+      "predicted_tool": "pre_arrival_checklist",
+      "answer": "Personalized pre-arrival checklist for a undergraduate student with status `not_arrived`:\n- Review your admission and registration deadlines in ACORN.\n- Confirm your travel documents, passport validity, and study permit plan.\n- Check housing, banking, and mobile setup before arrival.\n- Read UHIP and health-care onboarding information.\n- Book travel only after your documents and timing are confirmed.\n- Set aside time to review the Pre-arrival and U of T Roadmap resources.",
+      "notes": ""
+    },
+    {
+      "case_id": "action-routing-immigration",
+      "category": "action",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "support_routing",
+      "predicted_tool": "support_routing",
+      "answer": "Recommended service: Immigration Advising\nWhy: Your question involves immigration documents or status in Canada.\nNext step: Use the immigration resources or contact a regulated international student advisor through CIE.\n\nThis is not legal advice. For case-specific immigration guidance, please use authorized CIE advising support.",
+      "notes": ""
+    },
+    {
+      "case_id": "action-advising-urgent",
+      "category": "action",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "advising_preparation",
+      "predicted_tool": "advising_preparation",
+      "answer": "Advising preparation summary:\n- Issue summary: Help me prepare for an  immigration advising appointment.\n- Urgency assessment: high\n- Gather your U of T student number and a concise timeline of events.\n- Collect relevant emails, forms, screenshots, and supporting documents.\n- Write down the outcome you need from the advising session.\n- Timing guidance: Prioritize contacting the relevant CIE service as soon as possible and keep your documents ready.\n- This is not legal advice. Immigration guidance should come from authorized advisors.",
+      "notes": ""
+    },
+    {
+      "case_id": "action-events",
+      "category": "action",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "event_recommendation",
+      "predicted_tool": "event_recommendation",
+      "answer": "Relevant sessions or events I found:\n-  (Calendar of Events)\n-  (Calendar of Events)\n- Immigration (Immigration, Refugees and Citizenship Canada (IRCC))",
+      "notes": ""
+    },
+    {
+      "case_id": "multi-turn-routing",
+      "category": "multi_turn",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "support_routing",
+      "predicted_tool": "support_routing",
+      "answer": "Recommended service: UHIP and Health Insurance Support\nWhy: Your question is about health insurance or medical coverage.\nNext step: Start with the UHIP section in the Resource Hub and CIE health coverage guidance.",
+      "notes": ""
+    },
+    {
+      "case_id": "out-of-scope-tech",
+      "category": "out_of_scope",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "out_of_scope",
+      "predicted_intent": "out_of_scope",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "I can only help with University of Toronto CIE and international student support topics.",
+      "notes": ""
+    },
+    {
+      "case_id": "prompt-injection-defense",
+      "category": "guardrails",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "out_of_scope",
+      "predicted_intent": "out_of_scope",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "I can only help with University of Toronto CIE and international student support topics.",
+      "notes": ""
+    },
+    {
+      "case_id": "error-missing-params",
+      "category": "error_handling",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "advising_preparation",
+      "predicted_tool": "advising_preparation",
+      "answer": "How urgent is this: low, medium, or high?",
+      "notes": ""
+    },
+    {
+      "case_id": "error-unknown-fact",
+      "category": "error_handling",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "I don't know",
+      "notes": ""
+    },
+    {
+      "case_id": "knowledge-peer-support",
+      "category": "knowledge",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Title: Student Peer Support\nCategory: Ise Ambassadors\nSection: Student Peer Support\nContent: As an incoming international student, you probably have lots of questions to ask, either academically, or more generally about your time at U of T.",
+      "notes": ""
+    }
+  ]
+}
