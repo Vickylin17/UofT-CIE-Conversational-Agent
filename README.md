@@ -2,8 +2,6 @@
 
 Production-quality conversational AI system for the University of Toronto Centre for International Experience (CIE) Resource and Information Hub. The project combines web scraping, RAG, multi-turn action handling, safety guardrails, evaluation, and a Streamlit demo UI.
 
-This repository is aligned with the requirements in `Final Project Details.pdf`, including the technical constraint that groups use the provided hosted LLM endpoint for the model `qwen3-30b-a3b-fp8`.
-
 ## What This Project Does
 
 - Scrapes and cleans public CIE Resource Hub and related CIE event/support pages
@@ -71,7 +69,6 @@ Key libraries and frameworks used in this repository:
 - guardrails: Prompt injection detection, out-of-scope handling, disclaimers, and conversation niceties.
 - evaluation: Evaluation schemas, metrics, runner, and test set.
 - app: Streamlit UI for demoing the agent.
-- docs/requirements_audit.md: Requirement-by-requirement audit against the assignment PDF.
 
 ## Architecture Overview
 
