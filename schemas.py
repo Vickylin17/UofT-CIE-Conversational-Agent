@@ -77,6 +77,10 @@ class AgentResponse(BaseModel):
 
 class SessionState(BaseModel):
     session_id: str
+    title: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    archived: bool = False
     history: list[ChatMessage] = Field(default_factory=list)
     active_tool: str | None = None
     collected_params: dict[str, Any] = Field(default_factory=dict)

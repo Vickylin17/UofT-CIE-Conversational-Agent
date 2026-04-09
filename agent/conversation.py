@@ -17,6 +17,7 @@ from guardrails.policies import (
 from memory.store import JSONMemoryStore
 from rag.service import RAGService
 from schemas import AgentResponse, ChatMessage, SessionState
+from text_utils import normalize_user_text
 from tools.registry import ToolRegistry
 
 
@@ -38,6 +39,17 @@ class ConversationAgent:
     def _save_session(self, session: SessionState) -> None:
         self.memory.save_session(session)
 
+    def _update_session_title(self, session: SessionState, message: str) -> None:
+        normalized = " ".join(message.split()).strip()
+        if not normalized:
+            return
+        if session.title and session.title != "New chat":
+            return
+        lowered = normalized.lower()
+        if lowered in {"hi", "hello", "hey", "what can i ask you", "what can you do"}:
+            return
+        session.title = normalized[:48]
+
     def _append_immigration_disclaimer(self, text: str, guardrails: list[str]) -> str:
         disclaimer = immigration_disclaimer()
         lowered = text.lower()
@@ -51,15 +63,87 @@ class ConversationAgent:
             "You can ask me about the UofT CIE Resource Hub, including pre-arrival planning, upon-arrival steps, "
             "UHIP, finances, immigration information in the hub, peer support, and relevant events. "
             "I can also generate a pre-arrival checklist, route you to the right CIE support service, "
-            "prepare you for an advising appointment, and recommend relevant sessions."
+            "prepare you for an advising appointment, help you collect booking details for an individual appointment, "
+            "and recommend relevant sessions."
         )
 
     def _greeting_response(self) -> str:
         return (
             "Hello! I can help with UofT CIE Resource Hub questions, pre-arrival checklists, support routing, "
-            "advising preparation, and event recommendations. Ask me something like "
+            "advising preparation, appointment booking intake, and event recommendations. Ask me something like "
             "`What does the hub say about UHIP?` or `Give me a pre-arrival checklist.`"
         )
+
+    def _looks_like_new_request(self, message: str) -> bool:
+        lowered = " ".join(message.lower().split()).strip()
+        if not lowered:
+            return False
+        return any(
+            lowered.startswith(prefix)
+            for prefix in [
+                "where can i find",
+                "where do i find",
+                "what does",
+                "what is",
+                "who should i contact",
+                "who do i contact",
+                "can you help",
+                "can i",
+                "give me",
+                "show me",
+                "recommend",
+                "route me",
+                "help me",
+                "i need",
+                "tell me about",
+                "find information",
+                "information about",
+                "how do i",
+                "how can i",
+            ]
+        )
+
+    def _message_matches_active_tool(self, session: SessionState, message: str) -> bool:
+        tool_name = session.active_tool or ""
+        missing = session.missing_params[0] if session.missing_params else ""
+        lowered = " ".join(message.lower().split()).strip()
+
+        if not tool_name or not missing:
+            return False
+
+        if tool_name == "advising_preparation":
+            if missing == "urgency":
+                return lowered in {"low", "medium", "high"} or any(
+                    token in lowered
+                    for token in ["urgent", "asap", "immediately", "not urgent", "later", "this week", "soon"]
+                )
+            if missing in {"issue", "timeline", "documents_ready", "goal"}:
+                return not self._looks_like_new_request(message)
+
+        if tool_name == "pre_arrival_checklist":
+            if missing == "student_type":
+                return any(token in lowered for token in ["undergrad", "undergraduate", "graduate", "masters", "phd", "exchange", "visiting", "other"])
+            if missing == "arrival_status":
+                return any(
+                    token in lowered
+                    for token in [
+                        "planning ahead",
+                        "arriving soon",
+                        "already in canada",
+                        "i'm in canada",
+                        "i am in canada",
+                        "next week",
+                        "not arrived",
+                    ]
+                )
+
+        if tool_name in {"support_routing", "event_recommendation"}:
+            return True
+
+        if tool_name == "appointment_booking":
+            return True
+
+        return not self._looks_like_new_request(message)
 
     def _finalize_response(self, session: SessionState, answer: str, response: AgentResponse) -> AgentResponse:
         session.history.append(ChatMessage(role="assistant", content=answer))
@@ -117,32 +201,41 @@ class ConversationAgent:
         guardrails: list[str] = []
 
         sanitized_message = sanitize_user_input(message)
+        normalized_message = normalize_user_text(sanitized_message)
         if detect_prompt_injection(message):
             guardrails.append("prompt_injection_detected")
-        if is_greeting(sanitized_message):
+        if is_greeting(normalized_message):
             answer = self._greeting_response()
             session.history.append(ChatMessage(role="user", content=message))
             response = AgentResponse(answer=answer, intent="knowledge", guardrails=guardrails)
             return session_id, self._finalize_response(session, answer, response)
-        if is_capability_question(sanitized_message):
+        if is_capability_question(normalized_message):
             answer = self._capabilities_response()
             session.history.append(ChatMessage(role="user", content=message))
             response = AgentResponse(answer=answer, intent="knowledge", guardrails=guardrails)
             return session_id, self._finalize_response(session, answer, response)
-        if is_out_of_scope_query(sanitized_message):
+        if is_out_of_scope_query(normalized_message):
             answer = "I can only help with University of Toronto CIE and international student support topics."
+            self._update_session_title(session, message)
             session.history.append(ChatMessage(role="user", content=message))
             response = AgentResponse(answer=answer, intent="out_of_scope", guardrails=guardrails)
             return session_id, self._finalize_response(session, answer, response)
 
+        self._update_session_title(session, message)
         session.history.append(ChatMessage(role="user", content=message))
 
         if session.active_tool:
-            response = self._handle_tool_turn(session, sanitized_message)
-            response.guardrails.extend(guardrails)
-            return session_id, self._finalize_response(session, response.answer, response)
+            if self._message_matches_active_tool(session, normalized_message):
+                response = self._handle_tool_turn(session, sanitized_message)
+                response.guardrails.extend(guardrails)
+                return session_id, self._finalize_response(session, response.answer, response)
 
-        intent = self.intent_classifier.classify(sanitized_message)
+            session.active_tool = None
+            session.collected_params = {}
+            session.missing_params = []
+            self._save_session(session)
+
+        intent = self.intent_classifier.classify(normalized_message)
         session.last_intent = intent.intent
 
         if intent.intent == "out_of_scope":
@@ -180,7 +273,7 @@ class ConversationAgent:
             response.guardrails.extend(guardrails)
             return session_id, self._finalize_response(session, response.answer, response)
 
-        answer, sources, retrieval_query = self.rag.answer(sanitized_message, history=session.history[:-1])
+        answer, sources, retrieval_query = self.rag.answer(normalized_message, history=session.history[:-1])
         if needs_immigration_disclaimer(message) or needs_immigration_disclaimer(answer):
             answer = self._append_immigration_disclaimer(answer, guardrails)
 

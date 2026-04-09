@@ -17,5 +17,5 @@ def read_json(path: Path, default: Any) -> Any:
     with path.open("r", encoding="utf-8") as handle:
         try:
             return json.load(handle)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, OSError):
             return default

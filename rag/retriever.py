@@ -7,6 +7,7 @@ from data_pipeline.io_utils import read_json
 from data_pipeline.embeddings import HashingEmbeddingProvider, build_embedding_provider
 from data_pipeline.vector_store import ChromaVectorStore
 from schemas import RetrievedDocument
+from text_utils import normalize_user_text
 
 
 STOPWORDS = {
@@ -35,9 +36,10 @@ STOPWORDS = {
 
 
 def extract_query_terms(query: str) -> set[str]:
+    normalized_query = normalize_user_text(query)
     return {
         token.lower()
-        for token in re.findall(r"\w+", query)
+        for token in re.findall(r"\w+", normalized_query)
         if len(token) > 2 and token.lower() not in STOPWORDS
     }
 

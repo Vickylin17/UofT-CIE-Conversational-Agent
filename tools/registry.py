@@ -3,6 +3,7 @@ from __future__ import annotations
 from config import AppConfig
 from tools.advising import AdvisingPreparationTool
 from tools.base import ActionTool
+from tools.booking import AppointmentBookingTool
 from tools.checklist import PreArrivalChecklistTool
 from tools.events import EventRecommendationTool
 from tools.routing import SupportRoutingTool
@@ -14,6 +15,7 @@ class ToolRegistry:
             PreArrivalChecklistTool(),
             SupportRoutingTool(),
             AdvisingPreparationTool(),
+            AppointmentBookingTool(),
             EventRecommendationTool(config),
         ]
         self.tools = {tool.name: tool for tool in tools}

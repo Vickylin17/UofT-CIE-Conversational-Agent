@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
+from urllib.parse import urlsplit, urlunsplit
 
 from config import AppConfig
 from llm import LLMClient
@@ -54,6 +55,18 @@ class RAGService:
         self.llm = LLMClient(config.llm)
         self.retriever = Retriever(config)
 
+    def _normalize_source_key(self, source: SourceAttribution) -> tuple[str, str, str]:
+        title = source.title.strip().lower()
+        section = source.section.strip().rstrip(":").lower()
+        url = source.url.strip()
+        if url:
+            parts = urlsplit(url)
+            normalized_path = parts.path.rstrip("/")
+            url = urlunsplit((parts.scheme, parts.netloc, normalized_path, "", ""))
+        if title and section:
+            return title, section, ""
+        return title, section, url
+
     def _rewrite_query(self, question: str, history: list[ChatMessage]) -> str:
         if not history or not self.llm.is_available():
             return question
@@ -71,11 +84,12 @@ class RAGService:
 
     def _dedupe_sources(self, sources: list[SourceAttribution], max_sources: int = 3) -> list[SourceAttribution]:
         unique_sources: list[SourceAttribution] = []
-        seen_urls: set[str] = set()
+        seen_keys: set[tuple[str, str, str]] = set()
         for source in sources:
-            if not source.url or source.url in seen_urls:
+            source_key = self._normalize_source_key(source)
+            if source_key in seen_keys:
                 continue
-            seen_urls.add(source.url)
+            seen_keys.add(source_key)
             unique_sources.append(source)
             if len(unique_sources) >= max_sources:
                 break

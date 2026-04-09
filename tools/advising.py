@@ -52,6 +52,10 @@ class AdvisingPreparationTool(ActionTool):
             "advising",
             "advising appointment",
             "immigration advising appointment",
+            "for an",
+            "for a",
+            "an",
+            "a",
         }
         if not issue or issue in generic_issue_phrases:
             return ["issue", "urgency", "timeline", "documents_ready", "goal"]
@@ -74,16 +78,18 @@ class AdvisingPreparationTool(ActionTool):
 
         output = (
             "Here is your advising preparation summary.\n\n"
-            f"Main issue: {issue}\n"
-            f"Urgency: {urgency}\n"
-            f"Current timeline: {timeline}\n"
-            f"Documents you already have: {documents_ready}\n"
-            f"What you want from the appointment: {goal}\n\n"
-            "What to bring or prepare:\n"
+            "**Appointment details**\n\n"
+            f"- Main issue: {issue}\n"
+            f"- Urgency: {urgency}\n"
+            f"- Current timeline: {timeline}\n"
+            f"- Documents you already have: {documents_ready}\n"
+            f"- What you want from the appointment: {goal}\n\n"
+            "**What to bring or prepare**\n\n"
             "- Your U of T student number\n"
             "- A short timeline of what happened and when\n"
             "- Relevant emails, forms, screenshots, and supporting documents\n"
             "- A short list of questions you want answered\n\n"
-            f"Preparation note: {urgency_note}"
+            "**Preparation note**\n\n"
+            f"- {urgency_note}"
         )
         return ToolResult(tool_name=self.name, output=output, metadata={"needs_disclaimer": is_immigration})

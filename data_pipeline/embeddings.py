@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from abc import ABC, abstractmethod
 
@@ -9,6 +10,9 @@ from sklearn.feature_extraction.text import HashingVectorizer
 
 from config import EmbeddingConfig
 from exceptions import ConfigurationError
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class BaseEmbeddingProvider(ABC):
@@ -41,7 +45,9 @@ class SentenceTransformerEmbeddingProvider(BaseEmbeddingProvider):
     def __init__(self, config: EmbeddingConfig) -> None:
         from sentence_transformers import SentenceTransformer
 
-        self.model = SentenceTransformer(config.model)
+        # Avoid blocking app startup on Hugging Face download attempts. If the
+        # model is not already cached locally, callers can fall back to hashing.
+        self.model = SentenceTransformer(config.model, local_files_only=True)
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         vectors = self.model.encode(texts, normalize_embeddings=True)
@@ -70,7 +76,12 @@ def build_embedding_provider(config: EmbeddingConfig) -> BaseEmbeddingProvider:
     if provider == "sentence-transformers":
         try:
             return SentenceTransformerEmbeddingProvider(config)
-        except Exception:
+        except Exception as exc:
+            LOGGER.warning(
+                "SentenceTransformer model '%s' was not available locally; falling back to hashing embeddings: %s",
+                config.model,
+                exc,
+            )
             return HashingEmbeddingProvider()
     if provider == "hashing":
         return HashingEmbeddingProvider()

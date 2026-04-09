@@ -99,6 +99,14 @@
     "expect_follow_up": true
   },
   {
+    "case_id": "advising-asks-for-issue-first",
+    "category": "error_handling",
+    "turns": ["Help me prepare for an advising appointment."],
+    "expected_intent": "action",
+    "expected_tool": "advising_preparation",
+    "expect_follow_up": true
+  },
+  {
     "case_id": "error-unknown-fact",
     "category": "error_handling",
     "turns": ["What does the hub say about a Mars campus shuttle?"],
@@ -111,5 +119,61 @@
     "turns": ["Is there anything in the hub about student peer support?"],
     "expected_intent": "knowledge",
     "expected_keywords": ["peer support"]
+  },
+  {
+    "case_id": "capability-when-help",
+    "category": "knowledge",
+    "turns": ["When can you help?"],
+    "expected_intent": "knowledge",
+    "expected_keywords": ["checklist", "support"]
+  },
+  {
+    "case_id": "greeting-with-punctuation",
+    "category": "knowledge",
+    "turns": ["Hello!"],
+    "expected_intent": "knowledge",
+    "expected_keywords": ["hello", "help"]
+  },
+  {
+    "case_id": "checklist-short-followup-arriving-soon",
+    "category": "multi_turn",
+    "turns": ["I need a pre-arrival checklist.", "arriving soon", "I'm a graduate student."],
+    "expected_intent": "action",
+    "expected_tool": "pre_arrival_checklist",
+    "expected_keywords": ["graduate", "arriving soon"],
+    "expect_follow_up": false
+  },
+  {
+    "case_id": "checklist-typo-followup",
+    "category": "multi_turn",
+    "turns": ["I need a pre-arrival cheklist.", "im a graduate student ariving soon"],
+    "expected_intent": "action",
+    "expected_tool": "pre_arrival_checklist",
+    "expected_keywords": ["graduate", "arriving soon"],
+    "expect_follow_up": false
+  },
+  {
+    "case_id": "appointment-booking-intake",
+    "category": "action",
+    "turns": ["I want to book individual appointment"],
+    "expected_intent": "action",
+    "expected_tool": "appointment_booking",
+    "expect_follow_up": true
+  },
+  {
+    "case_id": "appointment-booking-keeps-asking-topic",
+    "category": "multi_turn",
+    "turns": [
+      "I want to book individual appointment",
+      "Vicky",
+      "incoming student",
+      "vvv@ut.com",
+      "yes",
+      "in-person",
+      "yes"
+    ],
+    "expected_intent": "action",
+    "expected_tool": "appointment_booking",
+    "expect_follow_up": true
   }
 ]

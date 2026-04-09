@@ -13,6 +13,13 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent
 
 
+def _default_session_store_path() -> Path:
+    override = os.getenv("CIE_SESSION_STORE_PATH")
+    if override:
+        return Path(override).expanduser()
+    return Path.home() / "Library" / "Application Support" / "UofT-CIE-Conversational-Agent" / "sessions.json"
+
+
 @dataclass(slots=True)
 class ScraperConfig:
     start_url: str = os.getenv(
@@ -77,7 +84,7 @@ class AppPaths:
     cleaned_docs_path: Path = BASE_DIR / "data" / "cleaned_docs.json"
     evaluation_cases_path: Path = BASE_DIR / "evaluation" / "test_cases.json"
     evaluation_results_path: Path = BASE_DIR / "evaluation" / "results.json"
-    session_store_path: Path = BASE_DIR / "data" / "sessions.json"
+    session_store_path: Path = field(default_factory=_default_session_store_path)
     chroma_dir: Path = BASE_DIR / "chroma_db"
 
 
@@ -94,6 +101,7 @@ class AppConfig:
         self.paths.data_dir.mkdir(parents=True, exist_ok=True)
         self.paths.chroma_dir.mkdir(parents=True, exist_ok=True)
         self.paths.evaluation_cases_path.parent.mkdir(parents=True, exist_ok=True)
+        self.paths.session_store_path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def load_config() -> AppConfig:

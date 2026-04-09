@@ -6,6 +6,7 @@ from config import AppConfig
 from guardrails.policies import is_out_of_scope_query, needs_immigration_disclaimer
 from llm import LLMClient
 from schemas import IntentResult
+from text_utils import is_brief_reply, looks_like_booking_request, match_arrival_status, match_student_type, normalize_user_text
 
 
 class IntentPayload(BaseModel):
@@ -27,6 +28,7 @@ Available tool names:
 - support_routing
 - advising_preparation
 - event_recommendation
+- appointment_booking
 
 Return strict JSON with keys: intent, tool_name, confidence, reasoning.
 """.strip()
@@ -37,13 +39,53 @@ class IntentClassifier:
         self.llm = LLMClient(config.llm)
 
     def classify(self, text: str) -> IntentResult:
-        lowered = text.lower()
+        lowered = normalize_user_text(text)
         if is_out_of_scope_query(text):
             return IntentResult(intent="out_of_scope", confidence=0.95, reasoning="Detected unrelated topic.")
 
+        if looks_like_booking_request(lowered):
+            return IntentResult(intent="action", tool_name="appointment_booking", confidence=0.92)
+
+        is_location_query = any(
+            phrase in lowered
+            for phrase in [
+                "where can i find",
+                "where do i find",
+                "find information",
+                "information about",
+                "looking for information",
+                "where is",
+                "link to",
+                "page for",
+            ]
+        )
+        if is_location_query and any(
+            keyword in lowered
+            for keyword in [
+                "uhip",
+                "health insurance",
+                "immigration",
+                "study permit",
+                "visa",
+                "events",
+                "workshop",
+                "session",
+                "orientation",
+            ]
+        ):
+            return IntentResult(intent="action", tool_name="support_routing", confidence=0.9)
+
         if any(keyword in lowered for keyword in ["checklist", "prepare for arrival", "before i arrive"]):
             return IntentResult(intent="action", tool_name="pre_arrival_checklist", confidence=0.8)
-        if any(keyword in lowered for keyword in ["advising", "appointment", "prepare for advising"]):
+        if is_brief_reply(lowered) and (match_arrival_status(lowered) or match_student_type(lowered)):
+            return IntentResult(intent="action", tool_name="pre_arrival_checklist", confidence=0.72)
+        if (
+            "prepare for advising" in lowered
+            or "prepare me for advising" in lowered
+            or "advising appointment" in lowered
+            or ("appointment" in lowered and "advising" in lowered)
+            or ("help me prepare" in lowered and ("advising" in lowered or "appointment" in lowered))
+        ):
             return IntentResult(intent="action", tool_name="advising_preparation", confidence=0.85)
         if any(
             keyword in lowered
@@ -58,7 +100,19 @@ class IntentClassifier:
             ]
         ):
             return IntentResult(intent="action", tool_name="support_routing", confidence=0.8)
-        if any(keyword in lowered for keyword in ["event", "workshop", "session", "orientation"]):
+        if any(
+            keyword in lowered
+            for keyword in [
+                "recommend an event",
+                "recommend events",
+                "suggest an event",
+                "suggest events",
+                "what events",
+                "which events",
+                "what sessions",
+                "which sessions",
+            ]
+        ):
             return IntentResult(intent="action", tool_name="event_recommendation", confidence=0.75)
         if needs_immigration_disclaimer(text):
             return IntentResult(intent="knowledge", confidence=0.65, reasoning="CIE-related immigration question.")
