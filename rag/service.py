@@ -18,6 +18,7 @@ from schemas import ChatMessage, SourceAttribution
 
 
 LOGGER = logging.getLogger(__name__)
+UNKNOWN_ANSWER_PATTERN = re.compile(r"^\s*i\s*(?:do\s*not|don't|dont)\s*know\b", re.IGNORECASE)
 
 
 def _extract_sentences(text: str) -> list[str]:
@@ -65,6 +66,10 @@ def _replace_internal_source_refs(answer: str, sources: list[SourceAttribution])
     cleaned = re.sub(r"\b[Dd]ocument\s+(\d+)\b", replacement, answer)
     cleaned = re.sub(r"\b[Ss]ource\s+(\d+)\b", replacement, cleaned)
     return cleaned
+
+
+def is_unknown_answer(text: str) -> bool:
+    return bool(UNKNOWN_ANSWER_PATTERN.match((text or "").strip()))
 
 
 class RAGService:
@@ -200,8 +205,13 @@ class RAGService:
         answer = self.llm.safe_complete(ANSWER_SYSTEM_PROMPT, user_prompt, fallback=fallback).strip()
         if not answer:
             answer = "I don't know"
-        if answer.strip().lower() == "i don't know":
-            return answer, [], retrieval_query
+
+        if is_unknown_answer(answer):
+            if not is_unknown_answer(fallback):
+                answer = fallback.strip()
+            if is_unknown_answer(answer):
+                return "I don't know", [], retrieval_query
+
         if answer.startswith("Title:"):
             answer = fallback
         answer = _replace_internal_source_refs(answer, self._dedupe_sources(sources))

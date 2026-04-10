@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from config import AppConfig
-from rag.service import RAGService, _replace_internal_source_refs
+from rag.service import RAGService, _replace_internal_source_refs, is_unknown_answer
 from rag.prompting import format_context, format_history
 from schemas import ChatMessage, SourceAttribution, ToolResult
 
@@ -109,6 +109,18 @@ class KnowledgeBackedActionTool(ActionTool):
         ).strip()
         if not answer:
             answer = "I don't know"
+
+        if is_unknown_answer(answer):
+            if not is_unknown_answer(fallback):
+                answer = fallback.strip()
+            if is_unknown_answer(answer):
+                return ToolResult(
+                    tool_name=self.name,
+                    output="I don't know",
+                    sources=[],
+                    metadata={"retrieval_query": retrieval_query, **(metadata or {})},
+                )
+
         answer = _replace_internal_source_refs(answer, sources)
         return ToolResult(
             tool_name=self.name,

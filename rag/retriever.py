@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 
 from config import AppConfig
@@ -34,6 +35,8 @@ STOPWORDS = {
     "hub",
     "information",
 }
+
+LOGGER = logging.getLogger(__name__)
 
 TERM_ALIASES = {
     "financial": "finances",
@@ -125,7 +128,11 @@ class Retriever:
         if isinstance(self.embedding_provider, HashingEmbeddingProvider):
             return lexical_results[:k]
 
-        semantic_results = self.vector_store.retrieve(query=query, top_k=max(k * 2, 8))
+        try:
+            semantic_results = self.vector_store.retrieve(query=query, top_k=max(k * 2, 8))
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning("Semantic retrieval failed; falling back to lexical retrieval only: %s", exc)
+            semantic_results = []
 
         merged: list[RetrievedDocument] = []
         seen: set[str] = set()

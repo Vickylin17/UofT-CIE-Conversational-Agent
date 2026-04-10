@@ -590,36 +590,34 @@ def render_session_card(agent: ConversationAgent, item: dict[str, str | int | bo
     st.markdown(f'<div class="chat-preview">{preview or "Open this conversation"}</div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    open_col, rename_col, archive_col, delete_col = st.columns([1.8, 1.25, 1.0, 0.95])
-    with open_col:
-        if st.button("Open", key=f"open_{session_id}", use_container_width=True):
-            st.session_state.active_session_id = session_id
-            st.session_state.chat_cache[session_id] = hydrate_session_messages(agent, session_id)
-            st.session_state.editing_session_id = None
+    if st.button("Open", key=f"open_{session_id}", use_container_width=True):
+        st.session_state.active_session_id = session_id
+        st.session_state.chat_cache[session_id] = hydrate_session_messages(agent, session_id)
+        st.session_state.editing_session_id = None
+        st.rerun()
+
+    if is_editing:
+        st.button("Editing", key=f"editing_{session_id}", use_container_width=True, disabled=True)
+    else:
+        if st.button("Rename", key=f"rename_{session_id}", use_container_width=True):
+            begin_rename_session(session_id, title)
             st.rerun()
-    with rename_col:
-        if is_editing:
-            st.button("Editing", key=f"editing_{session_id}", use_container_width=True, disabled=True)
-        else:
-            if st.button("Rename", key=f"rename_{session_id}", use_container_width=True):
-                begin_rename_session(session_id, title)
-                st.rerun()
-    with archive_col:
-        if st.button("Archive", key=f"archive_{session_id}", use_container_width=True):
-            agent.memory.archive_session(session_id)
-            st.session_state.chat_cache.pop(session_id, None)
-            st.session_state.editing_session_id = None
-            if st.session_state.active_session_id == session_id:
-                st.session_state.active_session_id = pick_next_session(agent)
-            st.rerun()
-    with delete_col:
-        if st.button("Delete", key=f"delete_{session_id}", use_container_width=True):
-            agent.memory.delete_session(session_id)
-            st.session_state.chat_cache.pop(session_id, None)
-            st.session_state.editing_session_id = None
-            if st.session_state.active_session_id == session_id:
-                st.session_state.active_session_id = pick_next_session(agent)
-            st.rerun()
+
+    if st.button("Archive", key=f"archive_{session_id}", use_container_width=True):
+        agent.memory.archive_session(session_id)
+        st.session_state.chat_cache.pop(session_id, None)
+        st.session_state.editing_session_id = None
+        if st.session_state.active_session_id == session_id:
+            st.session_state.active_session_id = pick_next_session(agent)
+        st.rerun()
+
+    if st.button("Delete", key=f"delete_{session_id}", use_container_width=True):
+        agent.memory.delete_session(session_id)
+        st.session_state.chat_cache.pop(session_id, None)
+        st.session_state.editing_session_id = None
+        if st.session_state.active_session_id == session_id:
+            st.session_state.active_session_id = pick_next_session(agent)
+        st.rerun()
 
 
 def render_sidebar(agent: ConversationAgent) -> None:
