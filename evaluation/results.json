@@ -1,26 +1,66 @@
 {
-  "total_cases": 15,
-  "passed_cases": 14,
-  "pass_rate": 0.9333333333333333,
+  "total_cases": 32,
+  "passed_cases": 23,
+  "pass_rate": 0.71875,
   "average_scores": {
     "intent_accuracy": 1.0,
     "action_success_rate": 1.0,
-    "answer_relevancy": 0.9,
-    "faithfulness": 0.9222222222222223,
-    "context_precision": 0.9666666666666667,
+    "answer_relevancy": 0.90625,
+    "faithfulness": 0.8322916666666668,
+    "context_precision": 0.9375,
     "safe_response": 1.0,
-    "error_handling_success": 1.0
+    "error_handling_success": 0.9375
   },
   "failure_cases": [
     {
-      "case_id": "knowledge-roadmap",
+      "case_id": "action-advising-urgent",
+      "category": "action",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 0.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "advising_preparation",
+      "predicted_tool": "advising_preparation",
+      "answer": "What is your current timeline or situation? For example, upcoming travel, a deadline, or something that already happened.",
+      "notes": ""
+    },
+    {
+      "case_id": "error-unknown-fact",
+      "category": "error_handling",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.0,
+        "context_precision": 0.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "I don't know.",
+      "notes": ""
+    },
+    {
+      "case_id": "capability-when-help",
       "category": "knowledge",
       "passed": false,
       "scores": {
         "intent_accuracy": 1.0,
         "action_success_rate": 1.0,
         "answer_relevancy": 1.0,
-        "faithfulness": 0.3333333333333333,
+        "faithfulness": 0.3,
         "context_precision": 1.0,
         "safe_response": 1.0,
         "error_handling_success": 1.0
@@ -29,7 +69,127 @@
       "predicted_intent": "knowledge",
       "expected_tool": null,
       "predicted_tool": null,
-      "answer": "Title: ISE Roadmap\nCategory: Ise Roadmap\nSection: ISE Roadmap\nContent: Are you clear with your next steps?",
+      "answer": "You can ask me about the UofT CIE Resource Hub, including pre-arrival planning, upon-arrival steps, UHIP, finances, immigration information in the hub, peer support, and relevant events. I can also generate a pre-arrival checklist, route you to the right CIE support service, prepare you for an advising appointment, help you collect booking details for an individual appointment, and recommend relevant sessions.",
+      "notes": ""
+    },
+    {
+      "case_id": "greeting-with-punctuation",
+      "category": "knowledge",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Hello! I can help with UofT CIE Resource Hub questions, pre-arrival checklists, support routing, advising preparation, appointment booking intake, and event recommendations. Ask me something like `What does the hub say about UHIP?` or `Give me a pre-arrival checklist.`",
+      "notes": ""
+    },
+    {
+      "case_id": "appointment-booking-summary-includes-contact",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 0.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "appointment_booking",
+      "predicted_tool": "appointment_booking",
+      "answer": "What do you want the appointment to be about?",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-booking-email-by-name",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Vicky's email is vvv@ut.com.",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-previous-question",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "The previous question was: \"Who should I contact about my study permit?\"",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-previous-answer-topic",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "The Hub states that UHIP is mandatory health care coverage for international and exchange students at the University of Toronto, covering September 1st to August 31st (adjusted for exchanges). It is tied to registration status, with a 2025 policy allowing a one-term break (winter/summer) without losing coverage if re-enrolled. Deregistration more than 45 days from a term\u2019s start excludes students from refunds for that term\u2019s coverage. Additional details on UHIP cards, coverage, and plan comparisons are available. | Sources: University Health Insurance Plan (UHIP)",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-previous-email",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "The email mentioned earlier is **isa.cie@utoronto.ca**.",
       "notes": ""
     }
   ],
@@ -42,8 +202,8 @@
         "intent_accuracy": 1.0,
         "action_success_rate": 1.0,
         "answer_relevancy": 1.0,
-        "faithfulness": 0.8333333333333334,
-        "context_precision": 0.5,
+        "faithfulness": 1.0,
+        "context_precision": 0.6666666666666666,
         "safe_response": 1.0,
         "error_handling_success": 1.0
       },
@@ -51,7 +211,7 @@
       "predicted_intent": "knowledge",
       "expected_tool": null,
       "predicted_tool": null,
-      "answer": "Title: Pre-Arrival\nCategory: Pre Arrival\nSection: Pre-Arrival\nContent: Congratulations and welcome to the University of Toronto!",
+      "answer": "The pre-arrival resources available in the CIE Resource and Information Hub include:  \n- A checklist for starting your journey at U of T, covering **academics**, **living in Toronto**, **study permits**, and **health insurance**.  \n- Information on **safety services** (Campus Safety, Community Safety Office, Sexual Violence Prevention & Support Centre, emergency services) and **travel options** in Toronto (TTC with student fares, Presto cards, biking, ride shares, taxis, driving, and GO Transit).  \n- Guidance on obtaining a **UTORid** and student number, including virtual TCard access by appointment.  \n- Resources for **parents and guardians** of incoming students via the Parents & Supporters website.  \n\nThese materials are organized under the \"Pre-Arrival\" section of the hub.\n\nNote: This is not legal advice. For case-specific immigration questions, please confirm details with a CIE advisor.",
       "notes": "Should mention the pre-arrival section when the index has been built."
     },
     {
@@ -62,8 +222,8 @@
         "intent_accuracy": 1.0,
         "action_success_rate": 1.0,
         "answer_relevancy": 1.0,
-        "faithfulness": 0.6666666666666666,
-        "context_precision": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 0.6666666666666666,
         "safe_response": 1.0,
         "error_handling_success": 1.0
       },
@@ -71,7 +231,27 @@
       "predicted_intent": "knowledge",
       "expected_tool": null,
       "predicted_tool": null,
-      "answer": "Title: Finances\nCategory: Finances\nSection: Finances\nContent: As an international student at U of T, you may have a variety of questions that relate to your finances.",
+      "answer": "Yes, the Hub provides information about finances for international students. It includes resources on income taxes in Canada, Social Insurance Numbers (SIN), funding opportunities (such as scholarships and awards), and working while studying. Additionally, it offers guidance on financial tips, financing graduate education, and job search support through Career Exploration and Education. For specific questions, the International Student Services team is available to assist.",
+      "notes": ""
+    },
+    {
+      "case_id": "knowledge-financial-resources",
+      "category": "knowledge",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 0.6666666666666666,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "The Hub (Centre for International Experience) provides information on financial resources for international students, including:  \n- **Funding opportunities**: Scholarships, entrance awards, in-course awards, and graduate-specific financing options.  \n- **Banking**: Guidance on opening a Canadian bank account, required documents (e.g., passport, study permit), and student account benefits.  \n- **Budgeting**: Tools like U of T\u2019s Financial Planning Calculator, government resources for managing finances, and financial literacy sessions.  \n\nFor details, refer to the \"Finances\" section under Funding, Banking, and Budgeting.\n\nNote: This is not legal advice. For case-specific immigration questions, please confirm details with a CIE advisor.",
       "notes": ""
     },
     {
@@ -91,18 +271,18 @@
       "predicted_intent": "knowledge",
       "expected_tool": null,
       "predicted_tool": null,
-      "answer": "Title: Managing Your UHIP\nCategory: Resource Hub\nSection: Extensions: Frequently asked questions\nContent: If you are graduating early and will not be enrolled in courses in the next semester, you will need to apply for a UHIP extension.",
+      "answer": "Yes, the Resource Hub provides assistance with UHIP questions through its sections like \"Managing Your UHIP,\" \"Onboard to UHIP,\" and \"Exemptions: frequently asked questions.\" It includes FAQs, tools (e.g., extension and exemption checkers), and detailed guidelines on eligibility, extensions, exemptions, and enrollment processes. For specific inquiries, contact details like the UHIP office email are also provided.",
       "notes": ""
     },
     {
       "case_id": "knowledge-roadmap",
       "category": "knowledge",
-      "passed": false,
+      "passed": true,
       "scores": {
         "intent_accuracy": 1.0,
         "action_success_rate": 1.0,
         "answer_relevancy": 1.0,
-        "faithfulness": 0.3333333333333333,
+        "faithfulness": 0.8333333333333334,
         "context_precision": 1.0,
         "safe_response": 1.0,
         "error_handling_success": 1.0
@@ -111,7 +291,7 @@
       "predicted_intent": "knowledge",
       "expected_tool": null,
       "predicted_tool": null,
-      "answer": "Title: ISE Roadmap\nCategory: Ise Roadmap\nSection: ISE Roadmap\nContent: Are you clear with your next steps?",
+      "answer": "The U of T Roadmap section provides guidance for international students throughout their academic journey at the University of Toronto. It includes three main components:  \n1. **Undergraduate Roadmap**: Highlights key milestones and checkpoints for international undergraduate students.  \n2. **Graduate Roadmap**: Offers resources and guidance for incoming international graduate students, focusing on stages, checkpoints, and support.  \n3. **Pre-Arrival**: Details steps to prepare before arriving, such as applying for a study permit, accessing pre-arrival guides, airport support, housing resources, budget planning, and setting up university accounts.  \n\nThe roadmap aims to help students navigate academic and practical aspects of their time at U of T.\n\nNote: This is not legal advice. For case-specific immigration questions, please confirm details with a CIE advisor.",
       "notes": ""
     },
     {
@@ -131,12 +311,12 @@
       "predicted_intent": "action",
       "expected_tool": "pre_arrival_checklist",
       "predicted_tool": "pre_arrival_checklist",
-      "answer": "Personalized pre-arrival checklist for a graduate student with status `arriving_soon`:\n- Coordinate with your graduate unit on registration and orientation timelines.\n- Prepare immigration documents and passport copies for travel and onboarding.\n- Review UHIP, funding disbursement timing, and arrival logistics.\n- Gather academic and financial records you may need after arrival.\n- Prepare printed and digital copies of your travel, immigration, and housing documents.\n- Plan your airport-to-housing route and your first-week essentials.",
+      "answer": "Here is your **pre-arrival checklist** for **a graduate student** who is **arriving soon**:\n\nUse this as a practical preparation list before you travel:\n\n- **Graduate program coordination:** Confirm registration, department orientation, supervisor or graduate unit instructions, and any onboarding tasks tied to your program, lab, or funding.\n- **Immigration documents:** Prepare your passport, visa or eTA, letter of acceptance, study permit paperwork, and printed backups so your border documents are easy to present.\n- **Funding and cash-flow plan:** Check when scholarships, TA or RA funding, payroll, or reimbursements begin so you can cover the gap between arrival and first payment.\n- **Housing confirmation:** Lock in your move-in plan, building access details, temporary backup stay if needed, and the exact route from the airport to your accommodation.\n- **Health coverage planning:** Review UHIP timing, required personal records, and what you should do if you need medical help before you are fully settled.\n- **Academic and identity records:** Keep your student number, offer details, department contacts, key emails, and any academic records you may need in one place.\n- **Research or work onboarding:** If your program involves lab access, TA work, or early department paperwork, note what documents or account access you may need in the first week.\n- **Carry-on document folder:** Put your passport, visa or eTA, admission documents, housing details, and study permit paperwork in your carry-on so they are immediately available.\n- **Airport-to-housing route:** Decide exactly how you will get from the airport to your accommodation, including late-night, weekend, or delayed-flight backup options.\n- **First 72 hours plan:** Prepare medications, weather-appropriate clothes, toiletries, payment access, and the essentials you need before you can fully unpack or shop.\n- **Arrival communications:** Make sure you can contact your housing provider, friend, family member, or campus office quickly if you are delayed or need help finding the location.",
       "notes": ""
     },
     {
-      "case_id": "action-checklist-followup",
-      "category": "multi_turn",
+      "case_id": "action-checklist-detailed-arrival",
+      "category": "action",
       "passed": true,
       "scores": {
         "intent_accuracy": 1.0,
@@ -151,7 +331,67 @@
       "predicted_intent": "action",
       "expected_tool": "pre_arrival_checklist",
       "predicted_tool": "pre_arrival_checklist",
-      "answer": "Personalized pre-arrival checklist for a undergraduate student with status `not_arrived`:\n- Review your admission and registration deadlines in ACORN.\n- Confirm your travel documents, passport validity, and study permit plan.\n- Check housing, banking, and mobile setup before arrival.\n- Read UHIP and health-care onboarding information.\n- Book travel only after your documents and timing are confirmed.\n- Set aside time to review the Pre-arrival and U of T Roadmap resources.",
+      "answer": "Here is your **pre-arrival checklist** for **a graduate student** who is **arriving soon**:\n\nUse this as a practical preparation list before you travel:\n\n- **Graduate program coordination:** Confirm registration, department orientation, supervisor or graduate unit instructions, and any onboarding tasks tied to your program, lab, or funding.\n- **Immigration documents:** Prepare your passport, visa or eTA, letter of acceptance, study permit paperwork, and printed backups so your border documents are easy to present.\n- **Funding and cash-flow plan:** Check when scholarships, TA or RA funding, payroll, or reimbursements begin so you can cover the gap between arrival and first payment.\n- **Housing confirmation:** Lock in your move-in plan, building access details, temporary backup stay if needed, and the exact route from the airport to your accommodation.\n- **Health coverage planning:** Review UHIP timing, required personal records, and what you should do if you need medical help before you are fully settled.\n- **Academic and identity records:** Keep your student number, offer details, department contacts, key emails, and any academic records you may need in one place.\n- **Research or work onboarding:** If your program involves lab access, TA work, or early department paperwork, note what documents or account access you may need in the first week.\n- **Carry-on document folder:** Put your passport, visa or eTA, admission documents, housing details, and study permit paperwork in your carry-on so they are immediately available.\n- **Airport-to-housing route:** Decide exactly how you will get from the airport to your accommodation, including late-night, weekend, or delayed-flight backup options.\n- **First 72 hours plan:** Prepare medications, weather-appropriate clothes, toiletries, payment access, and the essentials you need before you can fully unpack or shop.\n- **Arrival communications:** Make sure you can contact your housing provider, friend, family member, or campus office quickly if you are delayed or need help finding the location.\n- **Border readiness:** Know which documents you may need to show at the airport or port of entry, and keep all supporting paperwork together rather than packed away in checked luggage.\n- **First-time settlement planning:** Save your university address, housing address, emergency contacts, and key support links somewhere you can access offline if needed.\n- **Phone and connectivity:** Make a plan for mobile data, Wi-Fi access, and how you will contact housing or support services as soon as you land.\n- **Canadian essentials planning:** Read ahead about banking, transit, and SIN-related next steps so the first week in Canada feels less overwhelming.\n- **Weekend or after-hours check-in:** Confirm exactly how you will enter your building, collect keys, or reach staff if your housing office is closed when you arrive.\n- **Food and essentials backup:** Identify a nearby grocery store, pharmacy, or convenience option in case you arrive outside regular business hours.\n- **Weekend transit backup:** Check airport transit, taxi, or rideshare options for your expected arrival time so you are not stranded if regular service is limited.",
+      "notes": ""
+    },
+    {
+      "case_id": "action-checklist-detailed-undergrad-weekend",
+      "category": "action",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "pre_arrival_checklist",
+      "predicted_tool": "pre_arrival_checklist",
+      "answer": "Here is your **pre-arrival checklist** for **an undergraduate student** who is **arriving soon**:\n\nUse this as a practical preparation list before you travel:\n\n- **Academic setup:** Check your Join U of T, ACORN, and faculty onboarding steps so you know your registration tasks, tuition deadlines, and any pre-arrival forms still pending.\n- **Immigration documents:** Keep your passport, visa or eTA, PAL if required, letter of acceptance, and study permit support documents ready in both printed and digital form.\n- **Housing confirmation:** Finalize your residence, temporary accommodation, or off-campus housing details, including move-in date, address, payment instructions, and key pickup plan.\n- **Health coverage planning:** Review UHIP start timing, clinic access, and any prescription or vaccination records you should carry in case you need care soon after arrival.\n- **Money and payment access:** Prepare enough funds for your first weeks, make sure your bank cards will work in Canada, and set a rough budget for rent, food, transit, phone, and emergency costs.\n- **Technology and account access:** Test your UTORid, email, Duo or multi-factor login, and any student portals you may need for course enrolment, housing, or orientation.\n- **Packing priorities:** Put travel documents, medications, chargers, weather-appropriate clothes, and one change of essentials in your carry-on rather than your checked luggage.\n- **Carry-on document folder:** Put your passport, visa or eTA, admission documents, housing details, and study permit paperwork in your carry-on so they are immediately available.\n- **Airport-to-housing route:** Decide exactly how you will get from the airport to your accommodation, including late-night, weekend, or delayed-flight backup options.\n- **First 72 hours plan:** Prepare medications, weather-appropriate clothes, toiletries, payment access, and the essentials you need before you can fully unpack or shop.\n- **Arrival communications:** Make sure you can contact your housing provider, friend, family member, or campus office quickly if you are delayed or need help finding the location.\n- **Border readiness:** Know which documents you may need to show at the airport or port of entry, and keep all supporting paperwork together rather than packed away in checked luggage.\n- **First-time settlement planning:** Save your university address, housing address, emergency contacts, and key support links somewhere you can access offline if needed.\n- **Phone and connectivity:** Make a plan for mobile data, Wi-Fi access, and how you will contact housing or support services as soon as you land.\n- **Canadian essentials planning:** Read ahead about banking, transit, and SIN-related next steps so the first week in Canada feels less overwhelming.\n- **Weekend or after-hours check-in:** Confirm exactly how you will enter your building, collect keys, or reach staff if your housing office is closed when you arrive.\n- **Food and essentials backup:** Identify a nearby grocery store, pharmacy, or convenience option in case you arrive outside regular business hours.\n- **Weekend transit backup:** Check airport transit, taxi, or rideshare options for your expected arrival time so you are not stranded if regular service is limited.",
+      "notes": ""
+    },
+    {
+      "case_id": "action-checklist-phd-specific",
+      "category": "action",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "pre_arrival_checklist",
+      "predicted_tool": "pre_arrival_checklist",
+      "answer": "Here is your **pre-arrival checklist** for **a PhD student** who is **arriving soon**:\n\nUse this as a practical preparation list before you travel:\n\n- **Doctoral program coordination:** Confirm your department onboarding, SGS requirements, supervisor expectations, and any doctoral orientation, milestone, or registration steps due before arrival.\n- **Supervisor and research start plan:** Check whether your supervisor, lab, or research group expects any meetings, paperwork, ethics training, or onboarding tasks in your first weeks.\n- **Funding and stipend timing:** Confirm when your funding package, stipend, TA or RA payments, or reimbursements begin so you can plan for any gap before the first deposit arrives.\n- **Immigration documents:** Keep your passport, visa or eTA, admission letter, study permit support documents, and printed backups organized for travel and border inspection.\n- **Housing confirmation:** Finalize your move-in plan, building access, check-in instructions, and backup stay in case your travel timing shifts.\n- **Health coverage planning:** Review UHIP timing, any prescription or medical documents you should carry, and what to do if you need care before you are fully settled.\n- **Research and identity records:** Keep your student number, supervisor contact details, funding letters, department emails, and key academic records easy to access.\n- **Work eligibility planning:** If TA, RA, or campus employment starts early, read ahead on SIN and payroll-related next steps so you are ready once you arrive.\n- **Carry-on document folder:** Put your passport, visa or eTA, admission documents, housing details, and study permit paperwork in your carry-on so they are immediately available.\n- **Airport-to-housing route:** Decide exactly how you will get from the airport to your accommodation, including late-night, weekend, or delayed-flight backup options.\n- **First 72 hours plan:** Prepare medications, weather-appropriate clothes, toiletries, payment access, and the essentials you need before you can fully unpack or shop.\n- **Arrival communications:** Make sure you can contact your housing provider, friend, family member, or campus office quickly if you are delayed or need help finding the location.\n- **Border readiness:** Know which documents you may need to show at the airport or port of entry, and keep all supporting paperwork together rather than packed away in checked luggage.\n- **First-time settlement planning:** Save your university address, housing address, emergency contacts, and key support links somewhere you can access offline if needed.\n- **Phone and connectivity:** Make a plan for mobile data, Wi-Fi access, and how you will contact housing or support services as soon as you land.\n- **Canadian essentials planning:** Read ahead about banking, transit, and SIN-related next steps so the first week in Canada feels less overwhelming.",
+      "notes": ""
+    },
+    {
+      "case_id": "action-checklist-followup",
+      "category": "multi_turn",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "pre_arrival_checklist",
+      "predicted_tool": "pre_arrival_checklist",
+      "answer": "Here is your **pre-arrival checklist** for **an undergraduate student** who is **planning ahead**:\n\nUse this as a practical preparation list before you travel:\n\n- **Academic setup:** Check your Join U of T, ACORN, and faculty onboarding steps so you know your registration tasks, tuition deadlines, and any pre-arrival forms still pending.\n- **Immigration documents:** Keep your passport, visa or eTA, PAL if required, letter of acceptance, and study permit support documents ready in both printed and digital form.\n- **Housing confirmation:** Finalize your residence, temporary accommodation, or off-campus housing details, including move-in date, address, payment instructions, and key pickup plan.\n- **Health coverage planning:** Review UHIP start timing, clinic access, and any prescription or vaccination records you should carry in case you need care soon after arrival.\n- **Money and payment access:** Prepare enough funds for your first weeks, make sure your bank cards will work in Canada, and set a rough budget for rent, food, transit, phone, and emergency costs.\n- **Technology and account access:** Test your UTORid, email, Duo or multi-factor login, and any student portals you may need for course enrolment, housing, or orientation.\n- **Packing priorities:** Put travel documents, medications, chargers, weather-appropriate clothes, and one change of essentials in your carry-on rather than your checked luggage.\n- **Travel booking timing:** Finalize flights only after your entry documents, housing dates, and arrival plan line up so you do not create last-minute travel problems.\n- **Pre-arrival roadmap check:** Review the Pre-Arrival and Roadmap resources to make sure you have not missed any university, travel, or settlement task.\n- **Offline backup folder:** Download or print the key documents, addresses, and contact information you would still need if your phone battery dies or internet is unavailable.",
       "notes": ""
     },
     {
@@ -161,7 +401,7 @@
       "scores": {
         "intent_accuracy": 1.0,
         "action_success_rate": 1.0,
-        "answer_relevancy": 0.5,
+        "answer_relevancy": 1.0,
         "faithfulness": 1.0,
         "context_precision": 1.0,
         "safe_response": 1.0,
@@ -171,27 +411,27 @@
       "predicted_intent": "action",
       "expected_tool": "support_routing",
       "predicted_tool": "support_routing",
-      "answer": "Recommended service: Immigration Advising\nWhy: Your question involves immigration documents or status in Canada.\nNext step: Use the immigration resources or contact a regulated international student advisor through CIE.\n\nThis is not legal advice. For case-specific immigration guidance, please use authorized CIE advising support.",
+      "answer": "The student should contact the **University of Toronto Centre for International Experience (CIE) Immigration Advising team** at **isa.cie@utoronto.ca** for assistance with study permit and visa documents. \n\n**Why this fits:**  \nThe retrieved context explicitly states that students whose PAL-supported study permit application was refused should contact their campus international office for support with re-applications and to request a new PAL. The email address **isa.cie@utoronto.ca** is directly provided in the \"Apply for Your Study Permit\" section as the point of contact for such matters. This aligns with the student\u2019s request for guidance on study permit and visa documents. \n\n**Next step:**  \nThe student should email **isa.cie@utoronto.ca** to seek personalized support for their specific situation.",
       "notes": ""
     },
     {
       "case_id": "action-advising-urgent",
       "category": "action",
-      "passed": true,
+      "passed": false,
       "scores": {
         "intent_accuracy": 1.0,
         "action_success_rate": 1.0,
-        "answer_relevancy": 0.5,
+        "answer_relevancy": 0.0,
         "faithfulness": 1.0,
         "context_precision": 1.0,
         "safe_response": 1.0,
-        "error_handling_success": 1.0
+        "error_handling_success": 0.0
       },
       "expected_intent": "action",
       "predicted_intent": "action",
       "expected_tool": "advising_preparation",
       "predicted_tool": "advising_preparation",
-      "answer": "Advising preparation summary:\n- Issue summary: Help me prepare for an  immigration advising appointment.\n- Urgency assessment: high\n- Gather your U of T student number and a concise timeline of events.\n- Collect relevant emails, forms, screenshots, and supporting documents.\n- Write down the outcome you need from the advising session.\n- Timing guidance: Prioritize contacting the relevant CIE service as soon as possible and keep your documents ready.\n- This is not legal advice. Immigration guidance should come from authorized advisors.",
+      "answer": "What is your current timeline or situation? For example, upcoming travel, a deadline, or something that already happened.",
       "notes": ""
     },
     {
@@ -211,7 +451,7 @@
       "predicted_intent": "action",
       "expected_tool": "event_recommendation",
       "predicted_tool": "event_recommendation",
-      "answer": "Relevant sessions or events I found:\n-  (Calendar of Events)\n-  (Calendar of Events)\n- Immigration (Immigration, Refugees and Citizenship Canada (IRCC))",
+      "answer": "Based on the provided context, here are the most relevant CIE events related to immigration:\n\n1. **International Student Career Discovery Support Group**  \n   - **Date**: February 23, 2026 (5:00 PM - 7:00 PM)  \n   - **Description**: Designed to help international students transition into their careers, with sessions on navigating job searches in Canada.  \n\n2. **Working in Canada and Entry Documents: Online Q&A Session**  \n   - **Date**: February 24, 2026 (2:00 PM - 3:00 PM)  \n   - **Description**: A live online session addressing legal authorization to work in Canada and entry documents.  \n\n3. **Study Permits and Entry Documents: Online Q&A Session**  \n   - **Date**: February 26, 2026 (10:00 AM - 11:00 AM)  \n   - **Description**: Hosted by CIE\u2019s immigration advisors, covering study permits and entry documents.  \n\nAdditional recurring sessions on similar topics are available throughout March 2026 (e.g., March 3, 4, 11, 25, etc.). These events focus on immigration-related issues such as work permits, study permits, and entry documents.",
       "notes": ""
     },
     {
@@ -231,7 +471,7 @@
       "predicted_intent": "action",
       "expected_tool": "support_routing",
       "predicted_tool": "support_routing",
-      "answer": "Recommended service: UHIP and Health Insurance Support\nWhy: Your question is about health insurance or medical coverage.\nNext step: Start with the UHIP section in the Resource Hub and CIE health coverage guidance.",
+      "answer": "The most relevant CIE support for UHIP and health insurance inquiries is the **\"Healthcare At U of T\"** page, specifically the section titled **\"Use the checker tool below to see what\u2019s covered under UHIP!\"** This page provides direct guidance on UHIP coverage, claim submission, and contacts for assistance. \n\n**Why it fits**: The content explicitly addresses UHIP coverage details, reimbursement processes, and links to key resources like **Cowan** (UHIP administrator) and student unions (UTSU, APUS, UTGSU) for further support. It also includes tools to check coverage and locate providers accepting UHIP. \n\n**Best next step**:  \n1. Visit the [UHIP coverage page](uhip.ca/uhip-services/coverage-details/#eye-examinations) to review what is covered.  \n2. Contact **Cowan** directly via their website ([uhip.ca/contact](uhip.ca/contact)) for help with claims or questions about coverage.  \n3. Reach out to your student union (e.g., [UTSU](utsu.ca/contact-us), [APUS](apus.ca/contactus), [UTGSU](utgsu.ca/health-and-dental)) for additional support.  \n\nThis ensures the student accesses accurate, step-by-step guidance tailored to UHIP and health insurance matters.",
       "notes": ""
     },
     {
@@ -291,11 +531,11 @@
       "predicted_intent": "action",
       "expected_tool": "advising_preparation",
       "predicted_tool": "advising_preparation",
-      "answer": "How urgent is this: low, medium, or high?",
+      "answer": "What specific issue do you want help with at the advising appointment?",
       "notes": ""
     },
     {
-      "case_id": "error-unknown-fact",
+      "case_id": "advising-asks-for-issue-first",
       "category": "error_handling",
       "passed": true,
       "scores": {
@@ -307,11 +547,31 @@
         "safe_response": 1.0,
         "error_handling_success": 1.0
       },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "advising_preparation",
+      "predicted_tool": "advising_preparation",
+      "answer": "What specific issue do you want help with at the advising appointment?",
+      "notes": ""
+    },
+    {
+      "case_id": "error-unknown-fact",
+      "category": "error_handling",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.0,
+        "context_precision": 0.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
       "expected_intent": "knowledge",
       "predicted_intent": "knowledge",
       "expected_tool": null,
       "predicted_tool": null,
-      "answer": "I don't know",
+      "answer": "I don't know.",
       "notes": ""
     },
     {
@@ -331,7 +591,247 @@
       "predicted_intent": "knowledge",
       "expected_tool": null,
       "predicted_tool": null,
-      "answer": "Title: Student Peer Support\nCategory: Ise Ambassadors\nSection: Student Peer Support\nContent: As an incoming international student, you probably have lots of questions to ask, either academically, or more generally about your time at U of T.",
+      "answer": "Yes, the Hub includes information about student peer support through the International Student Experience (ISE) Ambassador Program and the Bridging Connections Mentorship Program. These initiatives connect incoming international students with current U of T students for academic and general guidance. ISE Ambassadors, who are upper-year undergraduates and graduate students, offer support in person at the CIE\u2019s Resource and Information Hub or via email. Additionally, profiles like Folu, an ISE Ambassador, highlight the availability of peer support for questions and mentorship.",
+      "notes": ""
+    },
+    {
+      "case_id": "capability-when-help",
+      "category": "knowledge",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "You can ask me about the UofT CIE Resource Hub, including pre-arrival planning, upon-arrival steps, UHIP, finances, immigration information in the hub, peer support, and relevant events. I can also generate a pre-arrival checklist, route you to the right CIE support service, prepare you for an advising appointment, help you collect booking details for an individual appointment, and recommend relevant sessions.",
+      "notes": ""
+    },
+    {
+      "case_id": "greeting-with-punctuation",
+      "category": "knowledge",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Hello! I can help with UofT CIE Resource Hub questions, pre-arrival checklists, support routing, advising preparation, appointment booking intake, and event recommendations. Ask me something like `What does the hub say about UHIP?` or `Give me a pre-arrival checklist.`",
+      "notes": ""
+    },
+    {
+      "case_id": "checklist-short-followup-arriving-soon",
+      "category": "multi_turn",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "pre_arrival_checklist",
+      "predicted_tool": "pre_arrival_checklist",
+      "answer": "Here is your **pre-arrival checklist** for **a graduate student** who is **arriving soon**:\n\nUse this as a practical preparation list before you travel:\n\n- **Graduate program coordination:** Confirm registration, department orientation, supervisor or graduate unit instructions, and any onboarding tasks tied to your program, lab, or funding.\n- **Immigration documents:** Prepare your passport, visa or eTA, letter of acceptance, study permit paperwork, and printed backups so your border documents are easy to present.\n- **Funding and cash-flow plan:** Check when scholarships, TA or RA funding, payroll, or reimbursements begin so you can cover the gap between arrival and first payment.\n- **Housing confirmation:** Lock in your move-in plan, building access details, temporary backup stay if needed, and the exact route from the airport to your accommodation.\n- **Health coverage planning:** Review UHIP timing, required personal records, and what you should do if you need medical help before you are fully settled.\n- **Academic and identity records:** Keep your student number, offer details, department contacts, key emails, and any academic records you may need in one place.\n- **Research or work onboarding:** If your program involves lab access, TA work, or early department paperwork, note what documents or account access you may need in the first week.\n- **Carry-on document folder:** Put your passport, visa or eTA, admission documents, housing details, and study permit paperwork in your carry-on so they are immediately available.\n- **Airport-to-housing route:** Decide exactly how you will get from the airport to your accommodation, including late-night, weekend, or delayed-flight backup options.\n- **First 72 hours plan:** Prepare medications, weather-appropriate clothes, toiletries, payment access, and the essentials you need before you can fully unpack or shop.\n- **Arrival communications:** Make sure you can contact your housing provider, friend, family member, or campus office quickly if you are delayed or need help finding the location.",
+      "notes": ""
+    },
+    {
+      "case_id": "checklist-typo-followup",
+      "category": "multi_turn",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "pre_arrival_checklist",
+      "predicted_tool": "pre_arrival_checklist",
+      "answer": "Here is your **pre-arrival checklist** for **a graduate student** who is **arriving soon**:\n\nUse this as a practical preparation list before you travel:\n\n- **Graduate program coordination:** Confirm registration, department orientation, supervisor or graduate unit instructions, and any onboarding tasks tied to your program, lab, or funding.\n- **Immigration documents:** Prepare your passport, visa or eTA, letter of acceptance, study permit paperwork, and printed backups so your border documents are easy to present.\n- **Funding and cash-flow plan:** Check when scholarships, TA or RA funding, payroll, or reimbursements begin so you can cover the gap between arrival and first payment.\n- **Housing confirmation:** Lock in your move-in plan, building access details, temporary backup stay if needed, and the exact route from the airport to your accommodation.\n- **Health coverage planning:** Review UHIP timing, required personal records, and what you should do if you need medical help before you are fully settled.\n- **Academic and identity records:** Keep your student number, offer details, department contacts, key emails, and any academic records you may need in one place.\n- **Research or work onboarding:** If your program involves lab access, TA work, or early department paperwork, note what documents or account access you may need in the first week.\n- **Carry-on document folder:** Put your passport, visa or eTA, admission documents, housing details, and study permit paperwork in your carry-on so they are immediately available.\n- **Airport-to-housing route:** Decide exactly how you will get from the airport to your accommodation, including late-night, weekend, or delayed-flight backup options.\n- **First 72 hours plan:** Prepare medications, weather-appropriate clothes, toiletries, payment access, and the essentials you need before you can fully unpack or shop.\n- **Arrival communications:** Make sure you can contact your housing provider, friend, family member, or campus office quickly if you are delayed or need help finding the location.",
+      "notes": ""
+    },
+    {
+      "case_id": "appointment-booking-intake",
+      "category": "action",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "appointment_booking",
+      "predicted_tool": "appointment_booking",
+      "answer": "What name should I put on your appointment request summary?",
+      "notes": ""
+    },
+    {
+      "case_id": "appointment-booking-keeps-asking-topic",
+      "category": "multi_turn",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "appointment_booking",
+      "predicted_tool": "appointment_booking",
+      "answer": "What do you want the appointment to be about?",
+      "notes": ""
+    },
+    {
+      "case_id": "appointment-booking-summary-includes-contact",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 0.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 0.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "appointment_booking",
+      "predicted_tool": "appointment_booking",
+      "answer": "What do you want the appointment to be about?",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-booking-email-by-name",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "Vicky's email is vvv@ut.com.",
+      "notes": ""
+    },
+    {
+      "case_id": "active-tool-status-summary",
+      "category": "multi_turn",
+      "passed": true,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "action",
+      "predicted_intent": "action",
+      "expected_tool": "appointment_booking",
+      "predicted_tool": "appointment_booking",
+      "answer": "Here is what I have so far for **appointment booking**:\n- **Name:** vicky\n- **Topic:** Vicky\n\nI still need **student status** next.\nAre you newly admitted, incoming, or a current U of T student?",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-previous-question",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "The previous question was: \"Who should I contact about my study permit?\"",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-previous-answer-topic",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "The Hub states that UHIP is mandatory health care coverage for international and exchange students at the University of Toronto, covering September 1st to August 31st (adjusted for exchanges). It is tied to registration status, with a 2025 policy allowing a one-term break (winter/summer) without losing coverage if re-enrolled. Deregistration more than 45 days from a term\u2019s start excludes students from refunds for that term\u2019s coverage. Additional details on UHIP cards, coverage, and plan comparisons are available. | Sources: University Health Insurance Plan (UHIP)",
+      "notes": ""
+    },
+    {
+      "case_id": "memory-previous-email",
+      "category": "multi_turn",
+      "passed": false,
+      "scores": {
+        "intent_accuracy": 1.0,
+        "action_success_rate": 1.0,
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.3,
+        "context_precision": 1.0,
+        "safe_response": 1.0,
+        "error_handling_success": 1.0
+      },
+      "expected_intent": "knowledge",
+      "predicted_intent": "knowledge",
+      "expected_tool": null,
+      "predicted_tool": null,
+      "answer": "The email mentioned earlier is **isa.cie@utoronto.ca**.",
       "notes": ""
     }
   ]
