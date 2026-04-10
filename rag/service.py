@@ -13,7 +13,7 @@ from rag.prompting import (
     format_context,
     format_history,
 )
-from rag.retriever import Retriever, extract_query_terms
+from rag.retriever import Retriever, extract_query_terms, normalize_query_token
 from schemas import ChatMessage, SourceAttribution
 
 
@@ -46,6 +46,24 @@ def _clean_summary_text(text: str) -> str:
     cleaned = re.sub(r"\s+", " ", text).strip()
     cleaned = re.sub(r"\b(Undergraduate Graduate|Graduate Undergraduate)\b", "", cleaned, flags=re.I).strip()
     cleaned = re.sub(r"^Are you clear with your next steps\?\s*", "", cleaned, flags=re.I).strip()
+    return cleaned
+
+
+def _normalized_terms(text: str) -> set[str]:
+    return {normalize_query_token(token) for token in re.findall(r"\w+", text.lower()) if len(token) > 2}
+
+
+def _replace_internal_source_refs(answer: str, sources: list[SourceAttribution]) -> str:
+    def replacement(match: re.Match[str]) -> str:
+        index = int(match.group(1)) - 1
+        if 0 <= index < len(sources):
+            source = sources[index]
+            label = source.title.strip() or source.section.strip() or "the cited source"
+            return f"the {label} page"
+        return "the cited source"
+
+    cleaned = re.sub(r"\b[Dd]ocument\s+(\d+)\b", replacement, answer)
+    cleaned = re.sub(r"\b[Ss]ource\s+(\d+)\b", replacement, cleaned)
     return cleaned
 
 
@@ -103,13 +121,13 @@ class RAGService:
         for document_text in context_docs:
             document = _parse_document_text(document_text)
             searchable_text = f"{document.title} {document.section} {document.content}"
-            document_terms = {token.lower() for token in re.findall(r"\w+", searchable_text)}
+            document_terms = _normalized_terms(searchable_text)
             document_score = len(query_terms & document_terms)
             if document.title:
-                title_text = document.title.lower()
+                title_text = " ".join(sorted(_normalized_terms(document.title)))
                 document_score += sum(3 for term in query_terms if term in title_text)
             if document.section:
-                section_text = document.section.lower()
+                section_text = " ".join(sorted(_normalized_terms(document.section)))
                 document_score += sum(2 for term in query_terms if term in section_text)
             if document_score > best_document_score:
                 best_document_score = document_score
@@ -121,7 +139,7 @@ class RAGService:
         best_sentence = ""
         best_score = 0
         for sentence in _extract_sentences(best_document.content):
-            sentence_terms = {token.lower() for token in re.findall(r"\w+", sentence)}
+            sentence_terms = _normalized_terms(sentence)
             overlap = len(query_terms & sentence_terms)
             if overlap > best_score:
                 best_score = overlap
@@ -130,11 +148,17 @@ class RAGService:
         minimum_overlap = 2 if len(query_terms) >= 2 else 1
         if best_score < minimum_overlap:
             best_content = _clean_summary_text(best_document.content)
+            normalized_title = " ".join(sorted(_normalized_terms(best_document.title)))
             if "roadmap" in best_document.title.lower() and best_content:
                 return (
                     f"The {best_document.title} is a guide for international students that helps them stay on track "
                     "through their journey at the University of Toronto, including key milestones, checkpoints, and resources "
                     "across stages such as pre-arrival, transition in, and transition out."
+                )
+            if "finances" in normalized_title and best_content:
+                return (
+                    "The Finances section covers key financial resources for international students, including "
+                    "funding opportunities, banking, budgeting, working in Canada, emergency support, and income tax guidance."
                 )
             return "I don't know"
 
@@ -180,4 +204,5 @@ class RAGService:
             return answer, [], retrieval_query
         if answer.startswith("Title:"):
             answer = fallback
+        answer = _replace_internal_source_refs(answer, self._dedupe_sources(sources))
         return answer, self._dedupe_sources(sources), retrieval_query

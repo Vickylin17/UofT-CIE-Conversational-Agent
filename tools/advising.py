@@ -1,17 +1,19 @@
 from __future__ import annotations
 
-from tools.base import ActionTool, ToolParameter
+from uuid import uuid4
+
 from schemas import ToolResult
+from tools.base import KnowledgeBackedActionTool, ToolParameter
 
 
-URGENCY_GUIDANCE = {
-    "low": "Plan ahead and gather documents before reaching out.",
-    "medium": "Prepare your documents and timeline, then contact support promptly.",
-    "high": "Prioritize contacting the relevant CIE service as soon as possible and keep your documents ready.",
+URGENCY_LABELS = {
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
 }
 
 
-class AdvisingPreparationTool(ActionTool):
+class AdvisingPreparationTool(KnowledgeBackedActionTool):
     name = "advising_preparation"
     description = "Prepare a student for an advising conversation."
     parameters = [
@@ -67,29 +69,31 @@ class AdvisingPreparationTool(ActionTool):
                 missing.append(key)
         return missing
 
-    def run(self, params: dict[str, str]) -> ToolResult:
-        issue = params.get("issue", "general support")
-        urgency = params.get("urgency", "medium")
-        timeline = params.get("timeline", "")
-        documents_ready = params.get("documents_ready", "")
-        goal = params.get("goal", "")
-        urgency_note = URGENCY_GUIDANCE.get(urgency, URGENCY_GUIDANCE["medium"])
-        is_immigration = "immigration" in issue.lower() or "permit" in issue.lower() or "visa" in issue.lower()
+    def run(self, params: dict[str, str], request_text: str = "", history=None):
+        issue = params.get("issue", "general support").strip()
+        urgency = params.get("urgency", "medium").strip()
+        timeline = params.get("timeline", "").strip()
+        documents_ready = params.get("documents_ready", "").strip()
+        goal = params.get("goal", "").strip()
+        is_immigration = any(token in issue.lower() for token in ["immigration", "permit", "visa", "trv", "pgwp"])
 
-        output = (
-            "Here is your advising preparation summary.\n\n"
-            "**Appointment details**\n\n"
-            f"- Main issue: {issue}\n"
-            f"- Urgency: {urgency}\n"
-            f"- Current timeline: {timeline}\n"
-            f"- Documents you already have: {documents_ready}\n"
-            f"- What you want from the appointment: {goal}\n\n"
-            "**What to bring or prepare**\n\n"
-            "- Your U of T student number\n"
-            "- A short timeline of what happened and when\n"
-            "- Relevant emails, forms, screenshots, and supporting documents\n"
-            "- A short list of questions you want answered\n\n"
-            "**Preparation note**\n\n"
-            f"- {urgency_note}"
+        question = (
+            "A student wants help preparing for a CIE advising appointment.\n"
+            f"Main issue: {issue}\n"
+            f"Urgency: {urgency}\n"
+            f"Timeline: {timeline}\n"
+            f"Documents already available: {documents_ready}\n"
+            f"Desired outcome: {goal}\n"
+            f"Original request: {request_text or 'Help me prepare for advising'}\n\n"
+            "Using only the CIE knowledge base, provide a tailored appointment preparation summary. "
+            "Include what the student should bring, what to clarify before the appointment, and the most relevant next steps."
         )
-        return ToolResult(tool_name=self.name, output=output, metadata={"needs_disclaimer": is_immigration})
+        return self._grounded_answer(
+            question,
+            retrieval_query=f"{issue} advising appointment CIE immigration support documents next steps",
+            history=history,
+            metadata={
+                "needs_disclaimer": is_immigration,
+                "tool_mode": "knowledge_grounded_advising",
+            },
+        )

@@ -81,6 +81,14 @@ ARRIVAL_STATUS_PATTERNS = {
         "arrive soon",
         "coming soon",
         "next week",
+        "this weekend",
+        "next weekend",
+        "this saturday",
+        "this sunday",
+        "within 2 days",
+        "within two days",
+        "within 3 days",
+        "within three days",
         "in two weeks",
         "in 2 weeks",
         "this month",
@@ -100,7 +108,8 @@ ARRIVAL_STATUS_PATTERNS = {
 
 STUDENT_TYPE_PATTERNS = {
     "undergraduate": ["undergraduate", "undergrad"],
-    "graduate": ["graduate", "grad student", "masters", "phd"],
+    "graduate": ["graduate", "grad student", "masters", "master's", "msc", "ma", "meng"],
+    "phd": ["phd", "ph.d", "doctoral", "doctorate", "doctor of philosophy"],
     "exchange": ["exchange", "visiting"],
     "other": ["other"],
 }

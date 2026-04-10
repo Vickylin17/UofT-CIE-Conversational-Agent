@@ -3,11 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import sys
 
 from agent.conversation import ConversationAgent
 from config import load_config
 from data_pipeline.pipeline import run_pipeline
 from evaluation.runner import EvaluationRunner
+from exceptions import ConfigurationError
 from logging_utils import configure_logging
 
 
@@ -56,29 +58,33 @@ def main() -> None:
         print(json.dumps(stats, indent=2))
         return
 
-    agent = ConversationAgent(config)
-    if args.command == "ask":
-        session_id, response = agent.handle_message(args.question, args.session_id)
-        payload = {
-            "session_id": session_id,
-            "answer": response.answer,
-            "intent": response.intent,
-            "tool_name": response.tool_name,
-            "guardrails": response.guardrails,
-            "sources": [source.model_dump() for source in response.sources],
-            "metadata": response.metadata,
-        }
-        print(json.dumps(payload, indent=2))
-        return
+    try:
+        agent = ConversationAgent(config)
+        if args.command == "ask":
+            session_id, response = agent.handle_message(args.question, args.session_id)
+            payload = {
+                "session_id": session_id,
+                "answer": response.answer,
+                "intent": response.intent,
+                "tool_name": response.tool_name,
+                "guardrails": response.guardrails,
+                "sources": [source.model_dump() for source in response.sources],
+                "metadata": response.metadata,
+            }
+            print(json.dumps(payload, indent=2))
+            return
 
-    if args.command == "chat":
-        run_chat(agent)
-        return
+        if args.command == "chat":
+            run_chat(agent)
+            return
 
-    if args.command == "eval":
-        summary = EvaluationRunner(config).run_all()
-        print(json.dumps(summary, indent=2))
-        return
+        if args.command == "eval":
+            summary = EvaluationRunner(config).run_all()
+            print(json.dumps(summary, indent=2))
+            return
+    except ConfigurationError as exc:
+        print(f"Configuration error: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":

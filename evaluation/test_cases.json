@@ -15,6 +15,13 @@
     "expected_keywords": ["finances"]
   },
   {
+    "case_id": "knowledge-financial-resources",
+    "category": "knowledge",
+    "turns": ["What does the hub say about financial resources?"],
+    "expected_intent": "knowledge",
+    "expected_keywords": ["funding", "banking", "budgeting"]
+  },
+  {
     "case_id": "knowledge-uhip",
     "category": "knowledge",
     "turns": ["Can the Resource Hub help with UHIP questions?"],
@@ -34,7 +41,31 @@
     "turns": ["I'm a graduate student arriving soon. Give me a pre-arrival checklist."],
     "expected_intent": "action",
     "expected_tool": "pre_arrival_checklist",
-    "expected_keywords": ["graduate", "arriving_soon", "checklist"]
+    "expected_keywords": ["graduate", "immigration documents", "housing", "uhip", "funding"]
+  },
+  {
+    "case_id": "action-checklist-detailed-arrival",
+    "category": "action",
+    "turns": ["I want you to generate a pre-arrival checklist, I am a graduate student first time come to Canada, and I will arrive this weekend. What do I need to prepare?"],
+    "expected_intent": "action",
+    "expected_tool": "pre_arrival_checklist",
+    "expected_keywords": ["graduate", "immigration documents", "housing", "uhip", "weekend", "border", "phone"]
+  },
+  {
+    "case_id": "action-checklist-detailed-undergrad-weekend",
+    "category": "action",
+    "turns": ["I want you to generate a pre-arrival checklist, I am an undergraduate student first time come to Canada, and I will arrive next weekend. What do I need to prepare?"],
+    "expected_intent": "action",
+    "expected_tool": "pre_arrival_checklist",
+    "expected_keywords": ["undergraduate", "immigration documents", "housing", "uhip", "budget", "weekend", "carry-on"]
+  },
+  {
+    "case_id": "action-checklist-phd-specific",
+    "category": "action",
+    "turns": ["I want you to generate a pre-arrival checklist, I am a PhD student first time come to Canada, and I will arrive next year. What do I need to prepare?"],
+    "expected_intent": "action",
+    "expected_tool": "pre_arrival_checklist",
+    "expected_keywords": ["phd", "supervisor", "doctoral", "funding", "research", "uhip"]
   },
   {
     "case_id": "action-checklist-followup",
@@ -175,5 +206,81 @@
     "expected_intent": "action",
     "expected_tool": "appointment_booking",
     "expect_follow_up": true
+  },
+  {
+    "case_id": "appointment-booking-summary-includes-contact",
+    "category": "multi_turn",
+    "turns": [
+      "I want to book individual appointment",
+      "Vicky",
+      "incoming student",
+      "vvv@ut.com",
+      "study permit extension",
+      "in-person",
+      "yes"
+    ],
+    "expected_intent": "action",
+    "expected_tool": "appointment_booking",
+    "expected_keywords": ["Vicky", "vvv@ut.com", "study permit extension", "in-person"],
+    "expect_follow_up": false
+  },
+  {
+    "case_id": "memory-booking-email-by-name",
+    "category": "multi_turn",
+    "turns": [
+      "I want to book individual appointment",
+      "Vicky",
+      "incoming student",
+      "vvv@ut.com",
+      "study permit extension",
+      "in-person",
+      "yes",
+      "What is Vicky's email?"
+    ],
+    "expected_intent": "knowledge",
+    "expected_keywords": ["vvv@ut.com"]
+  },
+  {
+    "case_id": "active-tool-status-summary",
+    "category": "multi_turn",
+    "turns": [
+      "I want to book individual appointment",
+      "Vicky",
+      "What do you have so far?"
+    ],
+    "expected_intent": "action",
+    "expected_tool": "appointment_booking",
+    "expected_keywords": ["Vicky", "student status"],
+    "expect_follow_up": false
+  },
+  {
+    "case_id": "memory-previous-question",
+    "category": "multi_turn",
+    "turns": [
+      "Who should I contact about my study permit?",
+      "What was my previous question?"
+    ],
+    "expected_intent": "knowledge",
+    "expected_keywords": ["study permit", "contact"]
+  },
+  {
+    "case_id": "memory-previous-answer-topic",
+    "category": "multi_turn",
+    "turns": [
+      "What does the hub say about UHIP?",
+      "What did you say earlier about UHIP?"
+    ],
+    "expected_intent": "knowledge",
+    "expected_keywords": ["uhip", "health"]
+  },
+  {
+    "case_id": "memory-previous-email",
+    "category": "multi_turn",
+    "turns": [
+      "Who should I contact about the study permit?",
+      "What email did you mention earlier?"
+    ],
+    "expected_intent": "knowledge",
+    "expected_keywords": ["isa.cie@utoronto.ca"]
   }
 ]

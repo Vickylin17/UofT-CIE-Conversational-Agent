@@ -2,6 +2,14 @@ class ConfigurationError(Exception):
     """Raised when runtime configuration is invalid or incomplete."""
 
 
+class HostedLLMRequiredError(ConfigurationError):
+    """Raised when the hosted LLM is required for chat but not configured."""
+
+
+class StructuredOutputError(ConfigurationError):
+    """Raised when the hosted LLM does not return valid structured output."""
+
+
 class ScrapingError(Exception):
     """Raised when the crawler cannot collect source content."""
 

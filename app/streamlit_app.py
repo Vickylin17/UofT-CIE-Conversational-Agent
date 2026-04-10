@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import os
 import sys
 from datetime import datetime
@@ -24,6 +25,7 @@ if not (
 
 from agent.conversation import ConversationAgent
 from config import load_config
+from exceptions import ConfigurationError
 from logging_utils import configure_logging
 
 
@@ -73,7 +75,16 @@ def get_agent() -> ConversationAgent:
         configure_logging()
     except Exception as e:
         print(f"Error configuring logging: {e}")
-    return ConversationAgent(load_config())
+    try:
+        return ConversationAgent(load_config())
+    except ConfigurationError as exc:
+        st.error(
+            "The hosted LLM is not configured. "
+            "Set `LLM_API_KEY` in `.env` "
+            "to the course-provided token before using the chat agent."
+        )
+        st.caption(str(exc))
+        st.stop()
 
 
 def inject_styles() -> None:
@@ -195,6 +206,50 @@ def inject_styles() -> None:
             font-weight: 800;
             margin-bottom: 0.4rem;
         }
+        .chat-avatar {
+            width: 3.35rem;
+            height: 3.35rem;
+            border-radius: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 14px 28px rgba(47, 115, 181, 0.14);
+            margin-top: 0.15rem;
+            border: 1px solid rgba(82, 149, 214, 0.16);
+            overflow: hidden;
+        }
+        .chat-row {
+            margin-bottom: 1.5rem;
+        }
+        .chat-avatar-user {
+            background: linear-gradient(135deg, #d9ecff 0%, #f7fbff 100%);
+        }
+        .chat-avatar-assistant {
+            background: linear-gradient(135deg, #2b7fd1 0%, #6db5f3 100%);
+        }
+        .chat-avatar svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .user-bubble {
+            background: linear-gradient(135deg, rgba(255,255,255,0.94), rgba(240,247,255,0.96));
+            border: 1px solid rgba(60, 146, 220, 0.16);
+            border-radius: 1.4rem;
+            padding: 1rem 1.1rem;
+            color: #213049;
+            font-size: 1.02rem;
+            line-height: 1.45;
+            box-shadow: 0 16px 32px rgba(53, 114, 175, 0.08);
+            text-align: left;
+        }
+        .assistant-bubble {
+            background: rgba(255,255,255,0.74);
+            border: 1px solid rgba(60, 146, 220, 0.10);
+            border-radius: 1.4rem;
+            padding: 0.15rem 1rem 0.85rem 1rem;
+            box-shadow: 0 16px 32px rgba(53, 114, 175, 0.06);
+        }
         div.stButton > button {
             border-radius: 14px;
             border: 1px solid rgba(32, 103, 165, 0.14);
@@ -267,7 +322,8 @@ def inject_styles() -> None:
 
 def dedupe_sources(sources: list[dict], max_sources: int = 3) -> list[dict]:
     unique_sources: list[dict] = []
-    seen_keys: set[tuple[str, str, str]] = set()
+    seen_url_keys: set[str] = set()
+    seen_fallback_keys: set[tuple[str, str]] = set()
     for source in sources:
         title = str(source.get("title", "")).strip().lower()
         section = str(source.get("section", "")).strip().rstrip(":").lower()
@@ -275,11 +331,22 @@ def dedupe_sources(sources: list[dict], max_sources: int = 3) -> list[dict]:
         if raw_url:
             parts = urlsplit(raw_url)
             raw_url = urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
-        key = (title, section, "") if title and section else (title, section, raw_url)
-        if key in seen_keys:
-            continue
-        seen_keys.add(key)
-        unique_sources.append(source)
+
+        if raw_url:
+            if raw_url in seen_url_keys:
+                continue
+            seen_url_keys.add(raw_url)
+            compact_source = dict(source)
+            compact_source["url"] = raw_url
+            compact_source["_hide_section"] = True
+            unique_sources.append(compact_source)
+        else:
+            fallback_key = (title, section)
+            if fallback_key in seen_fallback_keys:
+                continue
+            seen_fallback_keys.add(fallback_key)
+            unique_sources.append(source)
+
         if len(unique_sources) >= max_sources:
             break
     return unique_sources
@@ -294,15 +361,91 @@ def render_sources(sources: list[dict]) -> None:
         title = source.get("title", "Source").strip() or "Source"
         section = source.get("section", "").strip().rstrip(":")
         label = f"[{title}]({source.get('url', '')})"
-        if section and section.lower() != title.lower():
+        hide_section = bool(source.get("_hide_section"))
+        if not hide_section and section and section.lower() != title.lower():
             st.markdown(f"- {label} - {section}")
         else:
             st.markdown(f"- {label}")
 
 
+def render_avatar(role: str) -> None:
+    avatar_class = "chat-avatar-user" if role == "user" else "chat-avatar-assistant"
+    if role == "user":
+        avatar_markup = """
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="userBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#e8f4ff"/>
+              <stop offset="100%" stop-color="#fdfefe"/>
+            </linearGradient>
+            <linearGradient id="userRing" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2c7fd2"/>
+              <stop offset="100%" stop-color="#78bdf6"/>
+            </linearGradient>
+          </defs>
+          <rect x="1.5" y="1.5" width="61" height="61" rx="19" fill="url(#userBg)"/>
+          <rect x="1.5" y="1.5" width="61" height="61" rx="19" fill="none" stroke="url(#userRing)" stroke-width="1.5"/>
+          <circle cx="32" cy="25" r="9" fill="#2f7ec3"/>
+          <path d="M18 48c2.7-8 9.2-12 14-12s11.3 4 14 12" fill="#2f7ec3"/>
+          <circle cx="32" cy="32" r="22" fill="none" stroke="#d2e9ff" stroke-width="1.6"/>
+        </svg>
+        """
+    else:
+        avatar_markup = """
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="assistantBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2c7fd2"/>
+              <stop offset="100%" stop-color="#7ac1f7"/>
+            </linearGradient>
+          </defs>
+          <rect x="1.5" y="1.5" width="61" height="61" rx="19" fill="url(#assistantBg)"/>
+          <rect x="1.5" y="1.5" width="61" height="61" rx="19" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+          <rect x="18" y="19" width="28" height="24" rx="8" fill="white" opacity="0.98"/>
+          <rect x="26" y="14" width="12" height="6" rx="3" fill="white" opacity="0.92"/>
+          <circle cx="27" cy="31" r="2.6" fill="#2f7ec3"/>
+          <circle cx="37" cy="31" r="2.6" fill="#2f7ec3"/>
+          <path d="M25.5 35.5c2.1 2.9 4.3 4.2 6.5 4.2s4.4-1.3 6.5-4.2" fill="none" stroke="#2f7ec3" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M21 46l4-4h14l4 4" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        """
+    st.markdown(
+        f'<div class="chat-avatar {avatar_class}">{avatar_markup}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_user_message(content: str) -> None:
+    st.markdown('<div class="chat-row">', unsafe_allow_html=True)
+    spacer_col, message_col, avatar_col = st.columns([0.14, 0.70, 0.16], vertical_alignment="top")
+    with message_col:
+        st.markdown(f'<div class="user-bubble">{html.escape(content)}</div>', unsafe_allow_html=True)
+    with avatar_col:
+        render_avatar("user")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+def render_assistant_message(content: str, sources: list[dict]) -> None:
+    st.markdown('<div class="chat-row">', unsafe_allow_html=True)
+    avatar_col, message_col, spacer_col = st.columns([0.16, 0.70, 0.14], vertical_alignment="top")
+    with avatar_col:
+        render_avatar("assistant")
+    with message_col:
+        st.markdown(content)
+        render_sources(sources)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
 def hydrate_session_messages(agent: ConversationAgent, session_id: str) -> list[dict]:
     session = agent.memory.get_session(session_id)
-    return [{"role": message.role, "content": message.content, "sources": []} for message in session.history]
+    return [
+        {
+            "role": message.role,
+            "content": message.content,
+            "sources": [source.model_dump() for source in message.sources],
+        }
+        for message in session.history
+    ]
 
 
 def ensure_state(agent: ConversationAgent) -> None:
@@ -327,14 +470,49 @@ def start_new_chat(agent: ConversationAgent) -> None:
 def process_prompt(agent: ConversationAgent, session_id: str, prompt: str) -> None:
     st.session_state.chat_cache.setdefault(session_id, [])
     st.session_state.chat_cache[session_id].append({"role": "user", "content": prompt, "sources": []})
-    _, response = agent.handle_message(prompt, session_id)
-    st.session_state.chat_cache[session_id].append(
-        {
+    render_user_message(prompt)
+
+    st.markdown('<div class="chat-row">', unsafe_allow_html=True)
+    assistant_col, message_col, _ = st.columns([0.16, 0.70, 0.14], vertical_alignment="top")
+    with assistant_col:
+        render_avatar("assistant")
+
+    assistant_payload: dict[str, str | list[dict]] = {
+        "role": "assistant",
+        "content": "",
+        "sources": [],
+    }
+    response = None
+    try:
+        with message_col:
+            placeholder = st.empty()
+            with placeholder.container():
+                with st.spinner("Preparing a response..."):
+                    _, response = agent.handle_message(prompt, session_id)
+            placeholder.empty()
+        if response is not None:
+            assistant_payload = {
+                "role": "assistant",
+                "content": response.answer,
+                "sources": [source.model_dump() for source in response.sources],
+            }
+            with message_col:
+                st.markdown(response.answer)
+                render_sources([source.model_dump() for source in response.sources])
+    except Exception as exc:  # noqa: BLE001
+        assistant_payload = {
             "role": "assistant",
-            "content": response.answer,
-            "sources": [source.model_dump() for source in response.sources],
+            "content": (
+                "I hit a system error while processing that request. "
+                "Please check the hosted LLM configuration and try again."
+            ),
+            "sources": [],
         }
-    )
+        st.error(str(exc))
+        with message_col:
+            st.markdown(str(assistant_payload["content"]))
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.session_state.chat_cache[session_id].append(assistant_payload)
 
 
 def format_timestamp(raw: str) -> str:
@@ -520,17 +698,18 @@ def main() -> None:
     if prompt:
         incoming_prompt = prompt
 
-    if incoming_prompt:
-        process_prompt(agent, active_session_id, incoming_prompt)
-
     chat_history = st.session_state.chat_cache.get(active_session_id, [])
     if not chat_history:
         render_empty_state()
 
     for item in chat_history:
-        with st.chat_message(item["role"]):
-            st.markdown(item["content"])
-            render_sources(item.get("sources", []))
+        if item["role"] == "user":
+            render_user_message(str(item["content"]))
+        else:
+            render_assistant_message(str(item["content"]), item.get("sources", []))
+
+    if incoming_prompt:
+        process_prompt(agent, active_session_id, incoming_prompt)
 
 
 if __name__ == "__main__":

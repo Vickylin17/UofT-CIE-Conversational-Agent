@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from tools.base import ActionTool, ToolParameter
-from schemas import SourceAttribution, ToolResult
+from config import AppConfig
+from schemas import ToolResult
+from tools.base import KnowledgeBackedActionTool, ToolParameter
 
 
 FORMAT_LABELS = {
@@ -24,7 +25,7 @@ FOLIO_LABELS = {
 }
 
 
-class AppointmentBookingTool(ActionTool):
+class AppointmentBookingTool(KnowledgeBackedActionTool):
     name = "appointment_booking"
     description = "Collect appointment booking details and guide the student to the right CIE booking path."
     parameters = [
@@ -63,6 +64,12 @@ class AppointmentBookingTool(ActionTool):
         ),
     ]
 
+    def __init__(self, config: AppConfig | None = None) -> None:
+        self.config = config
+        if config is None:
+            raise ValueError("AppointmentBookingTool requires AppConfig.")
+        super().__init__(config)
+
     def missing_params(self, provided: dict[str, str]) -> list[str]:
         missing: list[str] = []
         invalid_topic_values = {"", "yes", "no", "not sure", "in person", "in-person", "video", "phone"}
@@ -77,53 +84,54 @@ class AppointmentBookingTool(ActionTool):
                 missing.append(param.name)
         return missing
 
-    def run(self, params: dict[str, str]) -> ToolResult:
+    def run(self, params: dict[str, str], request_text: str = "", history=None) -> ToolResult:
         name = params.get("name", "").strip()
-        student_status = STATUS_LABELS.get(params.get("student_status", ""), params.get("student_status", "student"))
+        student_status_raw = params.get("student_status", "")
+        student_status = STATUS_LABELS.get(student_status_raw, student_status_raw or "student")
         contact_details = params.get("contact_details", "").strip()
         topic = params.get("topic", "").strip()
-        appointment_format = FORMAT_LABELS.get(params.get("appointment_format", ""), params.get("appointment_format", ""))
+        appointment_format_raw = params.get("appointment_format", "")
+        appointment_format = FORMAT_LABELS.get(appointment_format_raw, appointment_format_raw)
         folio_access = params.get("folio_access", "")
+        folio_access_label = FOLIO_LABELS.get(folio_access, folio_access)
 
         request_summary = "\n".join(
             [
                 "Here is the appointment request information I captured:",
-                f"- Name: {name}",
-                f"- Student status: {student_status}",
-                f"- Contact: {contact_details}",
-                f"- Topic: {topic}",
-                f"- Preferred format: {appointment_format}",
-                f"- Folio access: {FOLIO_LABELS.get(folio_access, folio_access)}",
+                f"- **Name:** {name}",
+                f"- **Student status:** {student_status}",
+                f"- **Contact:** {contact_details}",
+                f"- **Topic:** {topic}",
+                f"- **Preferred format:** {appointment_format}",
+                f"- **Folio access:** {folio_access_label}",
             ]
         )
-
-        if folio_access == "yes":
-            next_step = (
-                "Next step: open Folio, go to the Appointments section, choose `Immigration Advising - CIE`, "
-                "pick your preferred time, and complete the intake form in the confirmation email."
-            )
-        elif folio_access == "no":
-            next_step = (
-                "Next step: if you are newly admitted, accept your U of T offer first so Folio becomes available. "
-                "If you are already a student and still cannot access Folio, email `isa.cie@utoronto.ca` with the summary above "
-                "and ask for help booking or temporary re-activation."
-            )
-        else:
-            next_step = (
-                "Next step: try signing into Folio first. If it does not work, email `isa.cie@utoronto.ca` with the summary above "
-                "and ask whether they can help you access booking."
-            )
-
+        question = (
+            "A student wants help with the CIE appointment booking process.\n"
+            f"Name: {name}\n"
+            f"Student status: {student_status}\n"
+            f"Contact details: {contact_details}\n"
+            f"Appointment topic: {topic}\n"
+            f"Preferred format: {appointment_format}\n"
+            f"Folio access: {folio_access_label}\n"
+            f"Original request: {request_text or 'I want to book an appointment'}\n\n"
+            "Using only the CIE knowledge base, write the most relevant next steps directly to the student.\n"
+            "Answer in second person using 'you'.\n"
+            "Do not narrate in third person.\n"
+            "Do not say 'the assistant noted' or similar meta language.\n"
+            "Do not repeat the captured fields because a summary will already be shown above.\n"
+            "Explain the best booking path based on the student's Folio access and topic.\n"
+            "If the knowledge base supports it, mention the relevant page or service they should use first."
+        )
+        result = self._grounded_answer(
+            question,
+            retrieval_query=f"appointment booking folio immigration advising CIE {topic}",
+            history=history,
+            metadata={"tool_mode": "knowledge_grounded_booking", "captured_params": params},
+        )
         output = (
             f"{request_summary}\n\n"
             "I can help you prepare the request, but I cannot submit the booking for you.\n\n"
-            f"{next_step}"
+            f"{result.output}"
         )
-        sources = [
-            SourceAttribution(
-                title="Connecting with ISIAs",
-                url="https://internationalexperience.utoronto.ca/international-student-services/immigration/connecting-with-isias",
-                section="Appointments",
-            )
-        ]
-        return ToolResult(tool_name=self.name, output=output, sources=sources)
+        return ToolResult(tool_name=self.name, output=output, sources=result.sources, metadata=result.metadata)

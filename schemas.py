@@ -49,6 +49,7 @@ class SourceAttribution(BaseModel):
 class ChatMessage(BaseModel):
     role: str
     content: str
+    sources: list[SourceAttribution] = Field(default_factory=list)
 
 
 class IntentResult(BaseModel):

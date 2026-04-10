@@ -153,6 +153,9 @@ class SlotFiller:
     def extract(self, tool: ActionTool, text: str, existing: dict[str, Any] | None = None) -> dict[str, Any]:
         existing = existing or {}
         heuristic = self._heuristic_extract(tool, text, existing=existing)
+        if not self.llm.is_available() and not self.llm.config.strict_mode:
+            merged = {**existing, **heuristic}
+            return {key: value for key, value in merged.items() if value not in (None, "", [])}
 
         tool_description = "\n".join(
             [

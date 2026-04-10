@@ -12,10 +12,10 @@ from tools.routing import SupportRoutingTool
 class ToolRegistry:
     def __init__(self, config: AppConfig) -> None:
         tools: list[ActionTool] = [
-            PreArrivalChecklistTool(),
-            SupportRoutingTool(),
-            AdvisingPreparationTool(),
-            AppointmentBookingTool(),
+            PreArrivalChecklistTool(config),
+            SupportRoutingTool(config),
+            AdvisingPreparationTool(config),
+            AppointmentBookingTool(config),
             EventRecommendationTool(config),
         ]
         self.tools = {tool.name: tool for tool in tools}

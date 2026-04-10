@@ -38,7 +38,7 @@ class IntentClassifier:
     def __init__(self, config: AppConfig) -> None:
         self.llm = LLMClient(config.llm)
 
-    def classify(self, text: str) -> IntentResult:
+    def _heuristic_classify(self, text: str) -> IntentResult:
         lowered = normalize_user_text(text)
         if is_out_of_scope_query(text):
             return IntentResult(intent="out_of_scope", confidence=0.95, reasoning="Detected unrelated topic.")
@@ -77,6 +77,12 @@ class IntentClassifier:
 
         if any(keyword in lowered for keyword in ["checklist", "prepare for arrival", "before i arrive"]):
             return IntentResult(intent="action", tool_name="pre_arrival_checklist", confidence=0.8)
+        if (
+            any(phrase in lowered for phrase in ["what do i need to prepare", "what should i prepare", "how should i prepare"])
+            and (match_arrival_status(lowered) or "arrive" in lowered or "arrival" in lowered)
+            and (match_student_type(lowered) or "student" in lowered)
+        ):
+            return IntentResult(intent="action", tool_name="pre_arrival_checklist", confidence=0.82)
         if is_brief_reply(lowered) and (match_arrival_status(lowered) or match_student_type(lowered)):
             return IntentResult(intent="action", tool_name="pre_arrival_checklist", confidence=0.72)
         if (
@@ -116,8 +122,13 @@ class IntentClassifier:
             return IntentResult(intent="action", tool_name="event_recommendation", confidence=0.75)
         if needs_immigration_disclaimer(text):
             return IntentResult(intent="knowledge", confidence=0.65, reasoning="CIE-related immigration question.")
+        return IntentResult(intent="knowledge", confidence=0.5, reasoning="Heuristic default.")
 
-        fallback = IntentPayload(intent="knowledge", tool_name=None, confidence=0.5, reasoning="Heuristic default.")
+    def classify(self, text: str) -> IntentResult:
+        if not self.llm.is_available() and not self.llm.config.strict_mode:
+            return self._heuristic_classify(text)
+
+        fallback = IntentPayload(**self._heuristic_classify(text).model_dump())
         payload = self.llm.safe_complete_json(
             system_prompt=INTENT_SYSTEM_PROMPT,
             user_prompt=f"Student message:\n{text}",

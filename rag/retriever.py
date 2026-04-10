@@ -30,17 +30,43 @@ STOPWORDS = {
     "which",
     "there",
     "resource",
+    "resources",
     "hub",
     "information",
 }
+
+TERM_ALIASES = {
+    "financial": "finances",
+    "finance": "finances",
+    "financing": "finances",
+    "fund": "funding",
+    "funds": "funding",
+    "budget": "budgeting",
+    "budgets": "budgeting",
+    "bank": "banking",
+    "banks": "banking",
+    "bank account": "banking",
+    "money": "finances",
+    "tax": "taxes",
+    "sin": "sin",
+}
+
+
+def normalize_query_token(token: str) -> str:
+    lowered = token.lower()
+    if lowered.endswith("ies") and len(lowered) > 4:
+        lowered = lowered[:-3] + "y"
+    elif lowered.endswith("s") and len(lowered) > 4:
+        lowered = lowered[:-1]
+    return TERM_ALIASES.get(lowered, lowered)
 
 
 def extract_query_terms(query: str) -> set[str]:
     normalized_query = normalize_user_text(query)
     return {
-        token.lower()
+        normalize_query_token(token)
         for token in re.findall(r"\w+", normalized_query)
-        if len(token) > 2 and token.lower() not in STOPWORDS
+        if len(token) > 2 and normalize_query_token(token) not in STOPWORDS
     }
 
 

@@ -13,6 +13,13 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent
 
 
+def _env_flag(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _default_session_store_path() -> Path:
     override = os.getenv("CIE_SESSION_STORE_PATH")
     if override:
@@ -54,9 +61,16 @@ class ChunkingConfig:
 
 @dataclass(slots=True)
 class EmbeddingConfig:
-    provider: str = os.getenv("EMBEDDING_PROVIDER", "sentence-transformers")
+    provider: str = os.getenv("EMBEDDING_PROVIDER", "openai-compatible")
     model: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
     openai_model: str = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+    base_url: str = os.getenv("EMBEDDING_BASE_URL", "https://rsm-8430-a2.bjlkeng.io")
+    api_key: str = (
+        os.getenv("EMBEDDING_API_KEY")
+        or os.getenv("LLM_API_KEY")
+        or os.getenv("QWEN_API_KEY")
+        or os.getenv("OPENAI_API_KEY", "")
+    )
 
 
 @dataclass(slots=True)
@@ -65,9 +79,11 @@ class LLMConfig:
     model: str = os.getenv("LLM_MODEL", os.getenv("OPENAI_CHAT_MODEL", "qwen3-30b-a3b-fp8"))
     base_url: str = os.getenv("LLM_BASE_URL", "https://rsm-8430-finalproject.bjlkeng.io/v1")
     api_key: str = os.getenv("LLM_API_KEY") or os.getenv("QWEN_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+    strict_mode: bool = _env_flag("LLM_STRICT_MODE", True)
     temperature: float = float(os.getenv("LLM_TEMPERATURE", os.getenv("OPENAI_TEMPERATURE", "0.1")))
-    max_output_tokens: int = int(
-        os.getenv("LLM_MAX_OUTPUT_TOKENS", os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "700"))
+    max_output_tokens: int = max(
+        1600,
+        int(os.getenv("LLM_MAX_OUTPUT_TOKENS", os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "1600"))),
     )
 
 
