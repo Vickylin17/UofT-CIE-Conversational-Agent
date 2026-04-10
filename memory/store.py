@@ -57,6 +57,19 @@ class JSONMemoryStore:
         self.save_session(session)
         return session
 
+    def rename_session(self, session_id: str, title: str) -> None:
+        with self.lock:
+            payload = read_json(self.path, default={})
+            raw = payload.get(session_id)
+            if raw is None:
+                return
+            session = SessionState.model_validate(raw)
+            cleaned_title = " ".join(title.split()).strip()
+            session.title = cleaned_title[:80] if cleaned_title else self._derive_title(session)
+            session.updated_at = self._now_iso()
+            payload[session_id] = session.model_dump()
+            write_json(self.path, payload)
+
     def list_sessions(self, include_archived: bool = False) -> list[dict[str, str | int | bool]]:
         with self.lock:
             payload = read_json(self.path, default={})

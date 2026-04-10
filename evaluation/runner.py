@@ -23,7 +23,7 @@ class EvaluationRunner:
         current_session_id = session_id
 
         for turn in case.turns:
-            current_session_id, response = self.agent.handle_message(turn, current_session_id)
+            current_session_id, response = self.agent.handle_message(turn, current_session_id, persist=False)
 
         assert response is not None
         answer = response.answer
@@ -47,6 +47,7 @@ class EvaluationRunner:
             ),
         }
         passed = all(score >= 0.5 for score in scores.values())
+        self.agent.discard_session(current_session_id, persist=False)
         return EvaluationResult(
             case_id=case.case_id,
             category=case.category,

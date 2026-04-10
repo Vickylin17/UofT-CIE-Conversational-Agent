@@ -244,11 +244,26 @@ def inject_styles() -> None:
             text-align: left;
         }
         .assistant-bubble {
-            background: rgba(255,255,255,0.74);
+            background: rgba(255,255,255,0.95);
             border: 1px solid rgba(60, 146, 220, 0.10);
             border-radius: 1.4rem;
-            padding: 0.15rem 1rem 0.85rem 1rem;
-            box-shadow: 0 16px 32px rgba(53, 114, 175, 0.06);
+            padding: 0.8rem 1rem 0.85rem 1rem;
+            box-shadow: none;
+            text-shadow: none;
+            filter: none;
+            backdrop-filter: none;
+        }
+        .rename-hint {
+            font-size: 0.72rem;
+            color: #7a91ab;
+            margin-top: -0.05rem;
+            margin-bottom: 0.35rem;
+        }
+        [data-testid="stSidebar"] .stTextInput input {
+            border-radius: 12px;
+            border: 1px solid rgba(60, 146, 220, 0.22);
+            background: rgba(255,255,255,0.95);
+            color: #183554;
         }
         div.stButton > button {
             border-radius: 14px;
@@ -453,6 +468,8 @@ def ensure_state(agent: ConversationAgent) -> None:
         st.session_state.chat_cache = {}
     if "pending_prompt" not in st.session_state:
         st.session_state.pending_prompt = None
+    if "editing_session_id" not in st.session_state:
+        st.session_state.editing_session_id = None
     sessions = agent.memory.list_sessions()
     if "active_session_id" not in st.session_state:
         st.session_state.active_session_id = sessions[0]["session_id"] if sessions else agent.new_session_id()
@@ -465,6 +482,24 @@ def start_new_chat(agent: ConversationAgent) -> None:
     session_id = agent.new_session_id()
     st.session_state.active_session_id = session_id
     st.session_state.chat_cache[session_id] = []
+    st.session_state.editing_session_id = None
+
+
+def begin_rename_session(session_id: str, title: str) -> None:
+    st.session_state.editing_session_id = session_id
+    st.session_state[f"rename_input_{session_id}"] = title
+
+
+def commit_rename_session(agent: ConversationAgent, session_id: str) -> None:
+    title = str(st.session_state.get(f"rename_input_{session_id}", "")).strip()
+    cleaned_title = " ".join(title.split()).strip()
+    if hasattr(agent.memory, "rename_session"):
+        agent.memory.rename_session(session_id, cleaned_title)
+    else:
+        session = agent.memory.get_session(session_id)
+        session.title = cleaned_title[:80] if cleaned_title else None
+        agent.memory.save_session(session)
+    st.session_state.editing_session_id = None
 
 
 def process_prompt(agent: ConversationAgent, session_id: str, prompt: str) -> None:
@@ -496,9 +531,6 @@ def process_prompt(agent: ConversationAgent, session_id: str, prompt: str) -> No
                 "content": response.answer,
                 "sources": [source.model_dump() for source in response.sources],
             }
-            with message_col:
-                st.markdown(response.answer)
-                render_sources([source.model_dump() for source in response.sources])
     except Exception as exc:  # noqa: BLE001
         assistant_payload = {
             "role": "assistant",
@@ -513,6 +545,7 @@ def process_prompt(agent: ConversationAgent, session_id: str, prompt: str) -> No
             st.markdown(str(assistant_payload["content"]))
     st.markdown("</div>", unsafe_allow_html=True)
     st.session_state.chat_cache[session_id].append(assistant_payload)
+    st.rerun()
 
 
 def format_timestamp(raw: str) -> str:
@@ -538,27 +571,44 @@ def render_session_card(agent: ConversationAgent, item: dict[str, str | int | bo
     updated_at = format_timestamp(str(item["updated_at"]))
     active = session_id == st.session_state.active_session_id
     card_class = "chat-card chat-card-active" if active else "chat-card"
+    is_editing = st.session_state.editing_session_id == session_id
 
-    st.markdown(
-        f"""
-        <div class="{card_class}">
-          <div class="chat-title">{title}</div>
-          <div class="chat-meta">{updated_at or "Saved chat"}</div>
-          <div class="chat-preview">{preview or "Open this conversation"}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    open_col, archive_col, delete_col = st.columns([2.2, 1.15, 1.0])
+    st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
+    if is_editing:
+        st.text_input(
+            "Rename session",
+            key=f"rename_input_{session_id}",
+            label_visibility="collapsed",
+            on_change=commit_rename_session,
+            args=(agent, session_id),
+            placeholder="Enter a conversation name",
+        )
+        st.markdown('<div class="rename-hint">Click outside the input or press Enter to save.</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="chat-title">{title}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="chat-meta">{updated_at or "Saved chat"}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="chat-preview">{preview or "Open this conversation"}</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    open_col, rename_col, archive_col, delete_col = st.columns([1.8, 1.25, 1.0, 0.95])
     with open_col:
         if st.button("Open", key=f"open_{session_id}", use_container_width=True):
             st.session_state.active_session_id = session_id
             st.session_state.chat_cache[session_id] = hydrate_session_messages(agent, session_id)
+            st.session_state.editing_session_id = None
             st.rerun()
+    with rename_col:
+        if is_editing:
+            st.button("Editing", key=f"editing_{session_id}", use_container_width=True, disabled=True)
+        else:
+            if st.button("Rename", key=f"rename_{session_id}", use_container_width=True):
+                begin_rename_session(session_id, title)
+                st.rerun()
     with archive_col:
         if st.button("Archive", key=f"archive_{session_id}", use_container_width=True):
             agent.memory.archive_session(session_id)
             st.session_state.chat_cache.pop(session_id, None)
+            st.session_state.editing_session_id = None
             if st.session_state.active_session_id == session_id:
                 st.session_state.active_session_id = pick_next_session(agent)
             st.rerun()
@@ -566,6 +616,7 @@ def render_session_card(agent: ConversationAgent, item: dict[str, str | int | bo
         if st.button("Delete", key=f"delete_{session_id}", use_container_width=True):
             agent.memory.delete_session(session_id)
             st.session_state.chat_cache.pop(session_id, None)
+            st.session_state.editing_session_id = None
             if st.session_state.active_session_id == session_id:
                 st.session_state.active_session_id = pick_next_session(agent)
             st.rerun()

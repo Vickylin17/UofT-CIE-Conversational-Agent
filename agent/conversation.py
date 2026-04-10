@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import re
 from uuid import uuid4
 
@@ -171,6 +172,7 @@ class ConversationAgent:
         if self.config.llm.strict_mode:
             self.llm.require_available("the conversational agent")
         self.memory = JSONMemoryStore(config.paths.session_store_path)
+        self.ephemeral_sessions: dict[str, SessionState] = {}
         self.intent_classifier = IntentClassifier(config)
         self.slot_filler = SlotFiller(config)
         self.tool_registry = ToolRegistry(config)
@@ -179,11 +181,43 @@ class ConversationAgent:
     def new_session_id(self) -> str:
         return str(uuid4())
 
-    def _load_session(self, session_id: str) -> SessionState:
-        return self.memory.get_session(session_id)
+    def _now_iso(self) -> str:
+        return datetime.now(timezone.utc).isoformat()
 
-    def _save_session(self, session: SessionState) -> None:
-        self.memory.save_session(session)
+    def _new_session(self, session_id: str) -> SessionState:
+        now = self._now_iso()
+        return SessionState(session_id=session_id, title="New chat", created_at=now, updated_at=now)
+
+    def _derive_session_title(self, session: SessionState) -> str:
+        if session.title and session.title.strip():
+            return session.title.strip()
+        for message in session.history:
+            if message.role == "user" and message.content.strip():
+                return message.content.strip()[:48]
+        return "New chat"
+
+    def _load_session(self, session_id: str, persist: bool = True) -> SessionState:
+        if persist:
+            return self.memory.get_session(session_id)
+        return self.ephemeral_sessions.get(session_id) or self._new_session(session_id)
+
+    def _save_session(self, session: SessionState, persist: bool = True) -> None:
+        if persist:
+            self.memory.save_session(session)
+            return
+
+        now = self._now_iso()
+        if not session.created_at:
+            session.created_at = now
+        session.updated_at = now
+        session.title = self._derive_session_title(session)
+        self.ephemeral_sessions[session.session_id] = session
+
+    def discard_session(self, session_id: str, persist: bool = True) -> None:
+        if persist:
+            self.memory.delete_session(session_id)
+            return
+        self.ephemeral_sessions.pop(session_id, None)
 
     def _update_session_title(self, session: SessionState, message: str) -> None:
         normalized = " ".join(message.split()).strip()
@@ -280,9 +314,15 @@ class ConversationAgent:
 
         return not self._looks_like_new_request(message)
 
-    def _finalize_response(self, session: SessionState, answer: str, response: AgentResponse) -> AgentResponse:
+    def _finalize_response(
+        self,
+        session: SessionState,
+        answer: str,
+        response: AgentResponse,
+        persist: bool = True,
+    ) -> AgentResponse:
         session.history.append(ChatMessage(role="assistant", content=answer, sources=response.sources))
-        self._save_session(session)
+        self._save_session(session, persist=persist)
         return response
 
     def _session_memory_history(self, session: SessionState) -> list[ChatMessage]:
@@ -536,13 +576,13 @@ class ConversationAgent:
                 return fallback
         return rendered
 
-    def _handle_tool_turn(self, session: SessionState, message: str) -> AgentResponse:
+    def _handle_tool_turn(self, session: SessionState, message: str, persist: bool = True) -> AgentResponse:
         tool = self.tool_registry.get(session.active_tool or "")
         if tool is None:
             session.active_tool = None
             session.collected_params = {}
             session.missing_params = []
-            self._save_session(session)
+            self._save_session(session, persist=persist)
             return AgentResponse(answer="I don't know", intent="action")
 
         params = self.slot_filler.extract(tool, message, existing=session.collected_params)
@@ -558,7 +598,7 @@ class ConversationAgent:
                 missing[0],
                 session.collected_params,
             )
-            self._save_session(session)
+            self._save_session(session, persist=persist)
             return AgentResponse(
                 answer=follow_up,
                 intent="action",
@@ -577,7 +617,7 @@ class ConversationAgent:
         session.collected_params = {}
         session.missing_params = []
         session.last_tool_name = tool.name
-        self._save_session(session)
+        self._save_session(session, persist=persist)
         return AgentResponse(
             answer=answer,
             intent="action",
@@ -587,9 +627,14 @@ class ConversationAgent:
             metadata={**result.metadata, "response_mode": "action_tool_grounded_kb"},
         )
 
-    def handle_message(self, message: str, session_id: str | None = None) -> tuple[str, AgentResponse]:
+    def handle_message(
+        self,
+        message: str,
+        session_id: str | None = None,
+        persist: bool = True,
+    ) -> tuple[str, AgentResponse]:
         session_id = session_id or self.new_session_id()
-        session = self._load_session(session_id)
+        session = self._load_session(session_id, persist=persist)
         guardrails: list[str] = []
 
         sanitized_message = sanitize_user_input(message)
@@ -605,7 +650,7 @@ class ConversationAgent:
                 guardrails=guardrails,
                 metadata={"response_mode": "static_guardrail"},
             )
-            return session_id, self._finalize_response(session, answer, response)
+            return session_id, self._finalize_response(session, answer, response, persist=persist)
         if is_capability_question(normalized_message):
             answer = self._capabilities_response()
             session.history.append(ChatMessage(role="user", content=message))
@@ -615,7 +660,7 @@ class ConversationAgent:
                 guardrails=guardrails,
                 metadata={"response_mode": "static_guardrail"},
             )
-            return session_id, self._finalize_response(session, answer, response)
+            return session_id, self._finalize_response(session, answer, response, persist=persist)
         if session.history and self._is_memory_recall_query(sanitized_message):
             self._update_session_title(session, message)
             session.history.append(ChatMessage(role="user", content=message))
@@ -626,7 +671,7 @@ class ConversationAgent:
                 guardrails=guardrails,
                 metadata={"response_mode": "session_memory"},
             )
-            return session_id, self._finalize_response(session, response.answer, response)
+            return session_id, self._finalize_response(session, response.answer, response, persist=persist)
         if is_out_of_scope_query(normalized_message):
             answer = "I can only help with University of Toronto CIE and international student support topics."
             self._update_session_title(session, message)
@@ -637,7 +682,7 @@ class ConversationAgent:
                 guardrails=guardrails,
                 metadata={"response_mode": "static_guardrail"},
             )
-            return session_id, self._finalize_response(session, answer, response)
+            return session_id, self._finalize_response(session, answer, response, persist=persist)
 
         self._update_session_title(session, message)
         session.history.append(ChatMessage(role="user", content=message))
@@ -652,17 +697,17 @@ class ConversationAgent:
                     guardrails=guardrails,
                     metadata={"response_mode": "action_status", "missing_params": session.missing_params},
                 )
-                return session_id, self._finalize_response(session, status_answer, response)
+                return session_id, self._finalize_response(session, status_answer, response, persist=persist)
 
             if self._message_matches_active_tool(session, normalized_message):
-                response = self._handle_tool_turn(session, sanitized_message)
+                response = self._handle_tool_turn(session, sanitized_message, persist=persist)
                 response.guardrails.extend(guardrails)
-                return session_id, self._finalize_response(session, response.answer, response)
+                return session_id, self._finalize_response(session, response.answer, response, persist=persist)
 
             session.active_tool = None
             session.collected_params = {}
             session.missing_params = []
-            self._save_session(session)
+            self._save_session(session, persist=persist)
 
         intent = self.intent_classifier.classify(normalized_message)
         session.last_intent = intent.intent
@@ -675,14 +720,14 @@ class ConversationAgent:
                 guardrails=guardrails,
                 metadata={"response_mode": "intent_out_of_scope"},
             )
-            return session_id, self._finalize_response(session, answer, response)
+            return session_id, self._finalize_response(session, answer, response, persist=persist)
 
         if intent.intent == "action":
             tool = self.tool_registry.get(intent.tool_name or "")
             if tool is None:
                 answer = "I don't know"
                 response = AgentResponse(answer=answer, intent="action", guardrails=guardrails)
-                return session_id, self._finalize_response(session, answer, response)
+                return session_id, self._finalize_response(session, answer, response, persist=persist)
 
             params = self.slot_filler.extract(tool, sanitized_message)
             missing = tool.missing_params(params)
@@ -698,7 +743,7 @@ class ConversationAgent:
                     missing[0],
                     session.collected_params,
                 )
-                self._save_session(session)
+                self._save_session(session, persist=persist)
                 response = AgentResponse(
                     answer=follow_up,
                     intent="action",
@@ -707,11 +752,11 @@ class ConversationAgent:
                     guardrails=guardrails,
                     metadata={"missing_params": missing, "response_mode": response_mode},
                 )
-                return session_id, self._finalize_response(session, follow_up, response)
+                return session_id, self._finalize_response(session, follow_up, response, persist=persist)
 
-            response = self._handle_tool_turn(session, sanitized_message)
+            response = self._handle_tool_turn(session, sanitized_message, persist=persist)
             response.guardrails.extend(guardrails)
-            return session_id, self._finalize_response(session, response.answer, response)
+            return session_id, self._finalize_response(session, response.answer, response, persist=persist)
 
         answer, sources, retrieval_query = self.rag.answer(normalized_message, history=session.history[:-1])
         if needs_immigration_disclaimer(message) or needs_immigration_disclaimer(answer):
@@ -725,4 +770,4 @@ class ConversationAgent:
             guardrails=guardrails,
             metadata={"retrieval_query": retrieval_query, "response_mode": response_mode},
         )
-        return session_id, self._finalize_response(session, answer, response)
+        return session_id, self._finalize_response(session, answer, response, persist=persist)
