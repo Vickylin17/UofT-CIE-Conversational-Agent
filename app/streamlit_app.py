@@ -573,7 +573,6 @@ def render_session_card(agent: ConversationAgent, item: dict[str, str | int | bo
     card_class = "chat-card chat-card-active" if active else "chat-card"
     is_editing = st.session_state.editing_session_id == session_id
 
-    st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
     if is_editing:
         st.text_input(
             "Rename session",
@@ -585,10 +584,16 @@ def render_session_card(agent: ConversationAgent, item: dict[str, str | int | bo
         )
         st.markdown('<div class="rename-hint">Click outside the input or press Enter to save.</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="chat-title">{title}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="chat-meta">{updated_at or "Saved chat"}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="chat-preview">{preview or "Open this conversation"}</div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div class="{card_class}">
+              <div class="chat-title">{html.escape(title)}</div>
+              <div class="chat-meta">{html.escape(updated_at or "Saved chat")}</div>
+              <div class="chat-preview">{html.escape(preview or "Open this conversation")}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if st.button("Open", key=f"open_{session_id}", use_container_width=True):
         st.session_state.active_session_id = session_id
