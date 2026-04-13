@@ -2,6 +2,8 @@
 
 The gitHub repository URL is: https://github.com/Vickylin17/UofT-CIE-Conversational-Agent.git
 
+The deployed agent URL is: https://uoft-cie-conversational-agent-rviilnh4286xgxtfzkf5ht.streamlit.app/
+
 This project is a chat assistant for the University of Toronto Centre for International Experience (CIE) Resource Hub. It can answer questions grounded in the CIE knowledge base, guide users through multi-step actions, keep conversation history within a session, and provide a Streamlit chat interface for demo and testing.
 
 ## What The App Can Do
