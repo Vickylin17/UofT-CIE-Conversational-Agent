@@ -4,6 +4,8 @@ The gitHub repository URL is: https://github.com/Vickylin17/UofT-CIE-Conversatio
 
 The deployed agent URL is: https://uoft-cie-conversational-agent-rviilnh4286xgxtfzkf5ht.streamlit.app/
 
+The backup demo video link is: https://utoronto-my.sharepoint.com/personal/manavdeepsingh_lamba_rotman_utoronto_ca/_layouts/15/stream.aspx?id=%2Fpersonal%2Fmanavdeepsingh%5Flamba%5Frotman%5Futoronto%5Fca%2FDocuments%2FLLM%2FB4EB5D77%2DC50A%2D43AB%2DA9A0%2D9FDA3C5CBACD%2EMP4&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&ga=1&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E42d57c9d%2Dc74c%2D4c79%2Daa54%2Dd4ae86d57401
+
 This project is a chat assistant for the University of Toronto Centre for International Experience (CIE) Resource Hub. It can answer questions grounded in the CIE knowledge base, guide users through multi-step actions, keep conversation history within a session, and provide a Streamlit chat interface for demo and testing.
 
 ## What The App Can Do
