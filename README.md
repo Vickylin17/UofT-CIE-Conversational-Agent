@@ -447,6 +447,236 @@ Do not run project commands from a parent folder that contains unrelated Python 
 - `evaluation/results.json`
   Saved evaluation output from the most recent run.
 
+## Dependencies
+
+This project is built using a modern Python stack for LLM applications, retrieval systems, and web interfaces.
+
+### Core Libraries
+
+* **Python 3.10+**
+* **Pydantic** – Data validation and structured schemas
+* **Requests / BeautifulSoup** – Web scraping and HTML parsing
+* **NumPy / Pandas** – Data processing and manipulation
+
+### LLM & NLP
+
+* **OpenAI-compatible API** – Hosted LLM and embeddings endpoint
+* **SentenceTransformers (optional fallback)** – Local embedding generation
+* **tiktoken (optional)** – Tokenization utilities
+
+### Vector Database
+
+* **ChromaDB** – Persistent vector store for semantic retrieval
+
+### Application Layer
+
+* **Streamlit** – Interactive web UI for the conversational agent
+
+### Evaluation
+
+* Custom evaluation framework with:
+
+  * JSON-based test cases
+  * Keyword coverage metrics
+  * Context precision checks
+
+### Utilities
+
+* **Logging / JSON / OS** – File handling, persistence, and debugging
+* **Retry logic (custom in `llm.py`)** – Robust API interaction
+
+
+## Architecture Overview
+
+This project implements a **production-style Agentic RAG (Retrieval-Augmented Generation) system** with modular design, supporting multi-turn conversations, tool usage, and evaluation.
+
+### High-Level Flow
+
+```
+User Input
+   ↓
+Guardrails (safety, scope, greetings)
+   ↓
+Intent Classification
+   ↓
+ ┌───────────────┬──────────────────────┐
+ │               │                      │
+Knowledge Q     Action Flow        Out-of-Scope
+(RAG)           (Tools)            (Fallback)
+ │               │                      │
+Retriever        Slot Filling           │
+ + LLM           + Tool Execution       │
+ │               │                      │
+   └───────────────┴──────────────────────┘
+                  ↓
+            Final Response
+                  ↓
+             Memory Store
+```
+
+
+### Core System Components
+
+#### 1. **Conversation Agent (Orchestration Layer)**
+
+* File: `agent/conversation.py`
+* Responsibilities:
+
+  * Entry point for all user interactions
+  * Applies guardrails and safety policies
+  * Routes requests (knowledge vs action)
+  * Maintains session memory
+  * Coordinates tools and RAG pipeline
+
+
+#### 2. **Intent Classification**
+
+* File: `agent/intent.py`
+* Classifies user input into:
+
+  * **Knowledge Queries** → handled by RAG
+  * **Action Requests** → routed to tools
+  * **Out-of-Scope** → fallback response
+
+
+#### 3. **RAG Pipeline (Knowledge Engine)**
+
+##### Retrieval
+
+* File: `rag/retriever.py`
+* Uses:
+
+  * Semantic similarity (embeddings)
+  * Lightweight lexical matching
+
+##### Answer Generation
+
+* File: `rag/service.py`
+* Responsibilities:
+
+  * Combine retrieved documents
+  * Format context
+  * Generate grounded responses
+  * Handle fallback (“I don’t know”)
+
+##### Prompting
+
+* File: `rag/prompting.py`
+* Builds:
+
+  * Context-aware prompts
+  * Includes short conversation history
+
+
+#### 4. **Tool System (Agent Actions)**
+
+Modular tool-based architecture for structured actions:
+
+| Tool           | Purpose                             |
+| -------------- | ----------------------------------- |
+| `checklist.py` | Generate pre-arrival checklists     |
+| `routing.py`   | Route users to correct CIE services |
+| `advising.py`  | Prepare advising session summaries  |
+| `booking.py`   | Collect and validate booking info   |
+| `events.py`    | Recommend relevant events           |
+
+* Tools inherit from `tools/base.py`
+* Registered via `tools/registry.py`
+* Invoked dynamically by the agent
+
+
+#### 5. **Slot Filling (Multi-Turn Actions)**
+
+* File: `agent/slot_filling.py`
+* Extracts structured parameters:
+
+  * Student type
+  * Arrival status
+  * Booking details
+* Enables **multi-step conversational workflows**
+
+
+#### 6. **Memory System**
+
+* File: `memory/store.py`
+* Stores:
+
+  * Chat history
+  * User session state
+* Enables:
+
+  * Persistent conversations
+  * Context-aware responses across turns
+
+
+#### 7. **Guardrails & Safety**
+
+* File: `guardrails/policies.py`
+* Handles:
+
+  * Greeting detection
+  * Prompt injection prevention
+  * Out-of-scope filtering
+  * Immigration disclaimers
+
+
+#### 8. **Data Pipeline (Offline Indexing)**
+
+Pipeline stages:
+
+1. **Scraping** (`scraper.py`)
+2. **Extraction** (`extractor.py`)
+3. **Cleaning** (`cleaner.py`)
+4. **Chunking** (`chunker.py`)
+5. **Embedding** (`embeddings.py`)
+6. **Storage** (`vector_store.py`)
+
+* Orchestrated by: `data_pipeline/pipeline.py`
+* Output:
+
+  * Clean corpus
+  * Vector database (`chroma_db/`)
+
+
+#### 9. **LLM Wrapper**
+
+* File: `llm.py`
+* Provides:
+
+  * API abstraction
+  * Retry handling
+  * Structured JSON parsing
+  * Fallback logic
+
+
+#### 10. **User Interface**
+
+* File: `app/streamlit_app.py`
+* Features:
+
+  * Chat interface
+  * Task buttons (actions)
+  * Saved conversations
+  * Source display
+  * Loading indicators
+
+
+#### 11. **Evaluation Framework**
+
+* Files:
+
+  * `evaluation/runner.py`
+  * `evaluation/metrics.py`
+* Capabilities:
+
+  * End-to-end testing
+  * Regression validation
+  * Metrics:
+
+    * Pass/fail
+    * Keyword coverage
+    * Context precision
+
 ## Suggested First Demo Path
 
 If you want a simple sanity-check after setup, test in this order:
